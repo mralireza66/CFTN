@@ -8,152 +8,703 @@
 <meta property="og:description" content="Un petit jeu pour découvrir le Master CFTN de l'Université de Strasbourg.">
 <meta property="og:type" content="website">
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow-x: hidden; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: linear-gradient(180deg, #FFB088 0%, #FFD9A8 50%, #FFF3D6 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, #5B8DB8 0%, #6FA3C7 40%, #B8B5E0 100%);
+    background-attachment: fixed;
     min-height: 100vh;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 16px;
+    padding: 24px 16px;
+    position: relative;
   }
-  .container { max-width: 720px; width: 100%; }
+  /* یه لکه‌ی نرم در بالا برای عمق */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(255,255,255,0.15) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::before { display: none; }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  #gameOverOverlay.visible { display: flex !important; }
+  #gameOverRestartBtn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(29,158,117,0.6) !important; }
+  #gameOverRestartBtn:active { transform: translateY(0); }
+  .container { max-width: 720px; width: 100%; position: relative; z-index: 1; }
+
+  /* عنوان جذاب */
   h1 {
-    color: #185FA5;
-    font-size: 28px;
-    margin-bottom: 4px;
+    font-family: 'Fredoka', sans-serif;
+    color: white;
+    font-size: 42px;
+    margin-bottom: 6px;
     text-align: center;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -1px;
+    text-shadow:
+      0 6px 24px rgba(0,0,0,0.3),
+      0 2px 4px rgba(0,0,0,0.2),
+      0 1px 0 rgba(255,255,255,0.15);
+    line-height: 1.1;
   }
   .subtitle {
     text-align: center;
-    color: #5C3A21;
-    margin-bottom: 16px;
+    color: rgba(255,255,255,0.95);
+    margin-bottom: 22px;
     font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
   }
+
+  /* صفحه‌ی اسم گرفتن - مینیمال و تمیز */
+  #nameScreen {
+    position: relative;
+    background: rgba(255,255,255,0.95) !important;
+    border-radius: 28px !important;
+    padding: 40px 32px !important;
+    box-shadow:
+      0 30px 70px rgba(0,0,0,0.2),
+      0 10px 24px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.8);
+    animation: slideUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .name-emoji {
+    font-size: 72px;
+    margin-bottom: 14px;
+    display: inline-block;
+    animation: bounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.3));
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-12px) rotate(8deg); }
+  }
+  .name-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #185FA5 0%, #D4537E 50%, #FF8C5C 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+  .name-desc {
+    font-size: 14px;
+    color: #4A3525;
+    margin-bottom: 24px;
+    line-height: 1.7;
+    font-weight: 500;
+  }
+  #nameInput {
+    font-family: 'Inter', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    padding: 16px 24px;
+    width: 100%;
+    max-width: 360px;
+    border: 2.5px solid rgba(24, 95, 165, 0.2);
+    border-radius: 16px;
+    text-align: center;
+    outline: none;
+    transition: all 0.25s ease;
+    background: rgba(255,255,255,0.85);
+    color: #185FA5;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+  #nameInput::placeholder { color: #BBB; font-weight: 500; }
+  #nameInput:focus {
+    border-color: #185FA5;
+    background: white;
+    box-shadow:
+      0 0 0 5px rgba(24, 95, 165, 0.15),
+      0 8px 24px rgba(0,0,0,0.12);
+    transform: translateY(-1px);
+  }
+  #startBtn {
+    padding: 18px 44px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 19px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #185FA5 0%, #4A8FCB 60%, #D4537E 100%);
+    background-size: 200% auto;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    margin-top: 18px;
+    box-shadow:
+      0 10px 30px rgba(24, 95, 165, 0.5),
+      inset 0 1px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+    letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+  }
+  #startBtn:hover {
+    background-position: right center;
+    transform: translateY(-3px);
+    box-shadow: 0 14px 36px rgba(24, 95, 165, 0.6);
+  }
+  #startBtn:active { transform: translateY(-1px); }
+
+  /* کارت‌های کاراکترها */
+  .characters-intro {
+    margin: 26px 0 8px;
+    display: grid;
+    gap: 14px;
+  }
+  .char-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    text-align: left;
+    border: 1.5px solid;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+  .char-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .char-viviana { border-color: rgba(247, 193, 213, 0.6); }
+  .char-viviana::before { background: linear-gradient(135deg, rgba(247, 193, 213, 0.35) 0%, rgba(255,240,245, 0.2) 100%); }
+  .char-alireza { border-color: rgba(232, 160, 136, 0.6); }
+  .char-alireza::before { background: linear-gradient(135deg, rgba(255, 200, 180, 0.35) 0%, rgba(255,232,224, 0.2) 100%); }
+  .char-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+  }
+  .char-avatar {
+    flex-shrink: 0;
+    width: 70px;
+    height: 70px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1;
+  }
+  .char-viviana .char-avatar {
+    box-shadow:
+      0 8px 24px rgba(212, 83, 126, 0.4),
+      inset 0 0 0 3px rgba(247, 193, 213, 0.6);
+    animation: floatChar 3s ease-in-out infinite;
+  }
+  .char-alireza .char-avatar {
+    box-shadow:
+      0 8px 24px rgba(163, 45, 45, 0.4),
+      inset 0 0 0 3px rgba(232, 160, 136, 0.6);
+    animation: floatChar 3.5s ease-in-out infinite reverse;
+  }
+  @keyframes floatChar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  .char-info { flex: 1; position: relative; z-index: 1; }
+  .char-name {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+  .char-viviana-name { color: #C03A66; }
+  .char-alireza-name { color: #8B1F1F; }
+  .char-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #4A3525;
+    font-weight: 500;
+  }
+  .char-tip {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6B4A2E;
+  }
+  .char-desc strong { font-weight: 700; }
+
+  /* Top scores preview */
+  #topScoresPreview {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1.5px dashed rgba(0,0,0,0.1);
+  }
+
+  /* HUD آمار - glassmorphism مدرن */
   .stats {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     gap: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
   .stat {
-    background: rgba(255,255,255,0.85);
-    border-radius: 8px;
-    padding: 10px 12px;
+    background: rgba(255,255,255,0.55);
+    border-radius: 18px;
+    padding: 12px 8px;
     text-align: center;
+    box-shadow:
+      0 8px 24px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border: 1px solid rgba(255,255,255,0.6);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .stat-label { font-size: 11px; color: #666; }
-  .stat-value { font-size: 20px; font-weight: 600; color: #185FA5; }
-  #help {
-    background: rgba(255,255,255,0.9);
+  .stat:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 12px 28px rgba(0,0,0,0.15),
+      inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+  .stat-label {
+    font-size: 10px;
+    color: #6B4A2E;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    opacity: 0.8;
+  }
+  .stat-value {
+    font-size: 20px;
+    font-weight: 700;
     color: #185FA5;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    font-size: 13px;
-    text-align: center;
+    font-family: 'Fredoka', sans-serif;
+    margin-top: 3px;
+    letter-spacing: -0.3px;
   }
+
+  /* راهنما */
+  #help {
+    background: rgba(255,255,255,0.55);
+    color: #185FA5;
+    padding: 14px 18px;
+    border-radius: 18px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow:
+      0 8px 24px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.6);
+    letter-spacing: 0.2px;
+  }
+
+  /* Canvas */
   canvas {
     width: 100%;
     height: auto;
     display: block;
-    border-radius: 12px;
+    border-radius: 24px;
     background: #FFD9A8;
     cursor: pointer;
-    border: 2px solid rgba(255,255,255,0.5);
+    box-shadow:
+      0 20px 60px rgba(0,0,0,0.3),
+      0 8px 20px rgba(0,0,0,0.2),
+      inset 0 1px 0 rgba(255,255,255,0.3);
+    border: 3px solid rgba(255,255,255,0.7);
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
   }
+
   .legend {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 12px;
+    gap: 12px;
+    margin-top: 14px;
     font-size: 12px;
   }
   .legend > div {
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-weight: 500;
+    box-shadow:
+      0 8px 20px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.5);
+    line-height: 1.5;
   }
-  .legend .bad { background: #FCEBEB; color: #791F1F; }
-  .legend .good { background: #EAF3DE; color: #27500A; }
+  .legend .bad {
+    background: linear-gradient(135deg, rgba(255,180,180,0.7) 0%, rgba(252,235,235,0.7) 100%);
+    color: #791F1F;
+  }
+  .legend .good {
+    background: linear-gradient(135deg, rgba(180,230,160,0.7) 0%, rgba(234,243,222,0.7) 100%);
+    color: #27500A;
+  }
+
+  /* دکمه‌های کنترل */
   .controls {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 10px;
+    margin-top: 14px;
   }
   .controls button {
-    padding: 14px;
-    font-size: 14px;
+    padding: 16px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    border: 1px solid rgba(0,0,0,0.2);
-    background: white;
-    border-radius: 8px;
+    border: none;
+    background: rgba(255,255,255,0.6);
+    border-radius: 16px;
     color: #185FA5;
+    box-shadow:
+      0 8px 20px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.7);
+    transition: all 0.2s ease;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.5);
+    letter-spacing: 0.3px;
   }
-  .controls button:hover { background: #f0f0f0; }
-  .controls button:active { transform: scale(0.97); }
+  .controls button:hover {
+    background: rgba(255,255,255,0.85);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.15);
+  }
+  .controls button:active { transform: translateY(0) scale(0.97); }
+
+  /* صفحه‌ی پایان */
   #share {
     display: none;
     margin-top: 16px;
-    background: rgba(255,255,255,0.95);
-    border-radius: 8px;
-    padding: 16px;
-    font-size: 13px;
+    background: rgba(255,255,255,0.97);
+    border-radius: 18px;
+    padding: 20px;
+    font-size: 14px;
     line-height: 1.6;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.6);
+    animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  #shareTitle { font-weight: 600; margin-bottom: 12px; font-size: 16px; color: #185FA5; }
+  #shareTitle {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    margin-bottom: 14px;
+    font-size: 20px;
+    color: #185FA5;
+    text-align: center;
+  }
   #shareText {
     white-space: pre-wrap;
-    font-family: monospace;
+    font-family: 'SF Mono', Consolas, monospace;
     font-size: 12px;
-    background: #f7f7f0;
-    padding: 12px;
-    border-radius: 6px;
+    background: linear-gradient(135deg, #F8F8F2 0%, #FFFFFF 100%);
+    padding: 14px;
+    border-radius: 12px;
     user-select: all;
+    border: 1px solid #EEE;
   }
   .copy-btn {
-    margin-top: 8px;
-    padding: 8px 16px;
-    background: #185FA5;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #185FA5 0%, #4A8FCB 100%);
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 10px;
     cursor: pointer;
     font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(24, 95, 165, 0.3);
+    transition: transform 0.15s ease;
   }
+  .copy-btn:hover { transform: translateY(-1px); }
+
+  #restartBigBtn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(29,158,117,0.5) !important; }
+  #restartBigBtn:active { transform: translateY(0); }
+  #changeNameBtn:hover { background: #185FA5 !important; color: white !important; }
+
+  /* Leaderboard */
+  #leaderboard {
+    background: rgba(255,255,255,0.97) !important;
+    border-radius: 18px !important;
+    padding: 20px !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.6);
+    animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   .footer {
-    margin-top: 16px;
+    margin-top: 24px;
     text-align: center;
-    font-size: 11px;
-    color: #5C3A21;
-    opacity: 0.7;
+    font-size: 12px;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    padding: 16px 0 24px;
+    line-height: 1.8;
+    font-weight: 500;
+    letter-spacing: 0.3px;
   }
-  .footer a { color: #185FA5; }
+  .footer a {
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1.5px solid rgba(255,255,255,0.5);
+    padding-bottom: 1px;
+    transition: border-color 0.2s ease;
+  }
+  .footer a:hover { border-bottom-color: white; }
+
+  /* 📱 تبلت */
+  @media (max-width: 720px) {
+    .container { max-width: 100%; }
+    h1 { font-size: 34px; }
+    .name-title { font-size: 30px; }
+    .stats { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .stat { padding: 8px 4px; }
+    .stat-label { font-size: 9px; letter-spacing: 0.4px; }
+    .stat-value { font-size: 16px; }
+    .controls button { padding: 14px 8px; font-size: 13px; }
+    .characters-intro { gap: 12px; }
+    .char-avatar { width: 64px; height: 64px; }
+    .char-name { font-size: 18px; }
+    .char-desc { font-size: 12.5px; }
+  }
+
+  /* 📱 موبایل */
+  @media (max-width: 520px) {
+    body { padding: 12px 10px; }
+    h1 { font-size: 26px; letter-spacing: -0.5px; }
+    .subtitle { font-size: 12px; margin-bottom: 14px; }
+    #nameScreen { padding: 26px 18px !important; border-radius: 22px !important; }
+    .name-emoji { font-size: 56px; margin-bottom: 10px; }
+    .name-title { font-size: 24px; margin-bottom: 8px; }
+    .name-desc { font-size: 13px; margin-bottom: 18px; }
+    #nameInput { font-size: 16px; padding: 14px 18px; }
+    #startBtn { padding: 16px 32px; font-size: 17px; margin-top: 16px; }
+    .characters-intro { margin: 22px 0 6px; gap: 10px; }
+    .char-card { padding: 12px 14px; gap: 12px; border-radius: 16px; }
+    .char-avatar { width: 56px; height: 56px; }
+    .char-avatar svg { width: 50px; height: 50px; }
+    .char-name { font-size: 16px; }
+    .char-desc { font-size: 12px; line-height: 1.45; }
+    .char-tip { font-size: 11.5px; }
+    /* HUD - ۴ ستون به جای ۵ روی موبایل */
+    .stats { grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
+    .stat { padding: 7px 3px; border-radius: 12px; }
+    .stat-label { font-size: 8px; }
+    .stat-value { font-size: 14px; }
+    /* "Niveau" رو روی موبایل حذف کن چون فضا کمه */
+    .stat:nth-child(4) { display: none; }
+    #help { font-size: 11px; padding: 10px 12px; border-radius: 12px; }
+    canvas { border-radius: 14px; border-width: 2px; }
+    .legend { grid-template-columns: 1fr; gap: 6px; font-size: 11.5px; }
+    .legend > div { padding: 8px 12px; border-radius: 10px; }
+    .controls { gap: 6px; margin-top: 10px; }
+    .controls button { padding: 12px 6px; font-size: 12px; border-radius: 12px; }
+    /* Game Over overlay - فونت کوچک‌تر روی موبایل */
+    #gameOverOverlay > div:nth-child(2) { font-size: 22px !important; }
+    #gameOverOverlay > div:nth-child(3) { font-size: 14px !important; }
+    #gameOverScore, #gameOverConcepts, #gameOverRankNum { font-size: 22px !important; }
+    #gameOverRestartBtn { padding: 12px 24px !important; font-size: 16px !important; }
+    .footer { font-size: 11px; }
+  }
+
+  /* 📱 موبایل کوچک */
+  @media (max-width: 380px) {
+    h1 { font-size: 22px; }
+    .name-title { font-size: 21px; }
+    .stats { grid-template-columns: repeat(3, 1fr); }
+    .stat:nth-child(4), .stat:nth-child(5) { display: none; }
+    .controls button { font-size: 11px; padding: 10px 4px; }
+  }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>🏃 CFTN Runner · Strasbourg</h1>
-  <div class="subtitle">Une journée dans la peau d'un·e étudiant·e du Master CFTN</div>
+  <div class="subtitle">Le parcours d'un·e étudiant·e du Master CFTN à Strasbourg</div>
+
+  <!-- صفحه‌ی شروع: گرفتن اسم -->
+  <div id="nameScreen" style="text-align: center; margin-top: 4px;">
+    <div style="display: inline-block; padding: 8px 18px; background: linear-gradient(135deg, rgba(232,74,95,0.25) 0%, rgba(24,95,165,0.25) 100%); border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.9); font-size: 11px; font-weight: 800; letter-spacing: 2px; color: #185FA5; text-transform: uppercase; margin-bottom: 18px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 6px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8);">
+      ✦ Master CFTN · Strasbourg ✦
+    </div>
+    <div class="name-emoji">🎓</div>
+    <div class="name-title">Bienvenue !</div>
+    <div class="name-desc">
+      À travers le parcours du Master CFTN,<br>
+      attrapez les concepts, évitez les pièges<br>
+      et rejoignez le classement ! ✨
+    </div>
+    <div class="characters-intro">
+      <!-- Viviana -->
+      <div class="char-card char-viviana">
+        <div class="char-avatar">
+          <svg viewBox="0 0 60 60" width="60" height="60">
+            <!-- هاله صورتی -->
+            <circle cx="30" cy="30" r="28" fill="url(#vivGlow)" opacity="0.4"/>
+            <defs>
+              <radialGradient id="vivGlow">
+                <stop offset="0%" stop-color="#FFB0CC"/>
+                <stop offset="100%" stop-color="#FFB0CC" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <!-- بال‌ها -->
+            <ellipse cx="14" cy="26" rx="9" ry="12" fill="#F7C1D5" opacity="0.7" stroke="#D4537E" stroke-width="0.8" transform="rotate(-15 14 26)"/>
+            <ellipse cx="46" cy="26" rx="9" ry="12" fill="#F7C1D5" opacity="0.7" stroke="#D4537E" stroke-width="0.8" transform="rotate(15 46 26)"/>
+            <!-- لباس -->
+            <path d="M 22 36 L 19 50 L 41 50 L 38 36 Z" fill="#E84A5F"/>
+            <path d="M 19 50 L 18 53 L 42 53 L 41 50 Z" fill="#FFD966"/>
+            <!-- پاها -->
+            <rect x="25" y="50" width="3" height="6" fill="#F5C4B3"/>
+            <rect x="32" y="50" width="3" height="6" fill="#F5C4B3"/>
+            <!-- سر -->
+            <circle cx="30" cy="24" r="8" fill="#F5C4B3"/>
+            <!-- مو مشکی -->
+            <path d="M 22 22 Q 30 12 38 22 L 38 26 Q 36 16 30 16 Q 24 16 22 26 Z" fill="#1A1A1A"/>
+            <!-- چشم -->
+            <circle cx="27" cy="24" r="1.4" fill="#1A1A1A"/>
+            <circle cx="33" cy="24" r="1.4" fill="#1A1A1A"/>
+            <!-- لبخند -->
+            <path d="M 28 28 Q 30 30 32 28" stroke="#A32D2D" fill="none" stroke-width="1"/>
+            <!-- چوب جادو -->
+            <line x1="42" y1="34" x2="50" y2="26" stroke="#5C3A21" stroke-width="2" stroke-linecap="round"/>
+            <polygon points="50,22 51,26 55,27 51,28 50,32 49,28 45,27 49,26" fill="#FFD966"/>
+          </svg>
+        </div>
+        <div class="char-info">
+          <div class="char-name char-viviana-name">✨ Viviana</div>
+          <div class="char-desc">Apparaît parfois et lance un <strong>♥ cœur</strong>.<br><span class="char-tip">Attrapez-le pour gagner une vie !</span></div>
+        </div>
+      </div>
+      <!-- Alireza -->
+      <div class="char-card char-alireza">
+        <div class="char-avatar">
+          <svg viewBox="0 0 60 60" width="60" height="60">
+            <!-- هاله قرمز تیره -->
+            <circle cx="30" cy="30" r="28" fill="url(#aliGlow)" opacity="0.5"/>
+            <defs>
+              <radialGradient id="aliGlow">
+                <stop offset="0%" stop-color="#A32D2D"/>
+                <stop offset="100%" stop-color="#A32D2D" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <!-- بال‌های خفاشی -->
+            <path d="M 22 26 L 8 18 L 5 28 L 12 32 L 7 36 L 18 34 Z" fill="#3D1F1F" stroke="#5C0E0E" stroke-width="0.8"/>
+            <path d="M 38 26 L 52 18 L 55 28 L 48 32 L 53 36 L 42 34 Z" fill="#3D1F1F" stroke="#5C0E0E" stroke-width="0.8"/>
+            <!-- لباس مشکی-قرمز -->
+            <path d="M 22 36 L 19 50 L 41 50 L 38 36 Z" fill="#3D0E0E"/>
+            <!-- لبه‌ی آتش -->
+            <path d="M 18 50 L 19 53 L 22 50 L 25 53 L 28 50 L 31 53 L 34 50 L 37 53 L 40 50 L 42 53 L 41 50 Z" fill="#D85A30"/>
+            <!-- پاها -->
+            <rect x="25" y="50" width="3" height="6" fill="#1A1A1A"/>
+            <rect x="32" y="50" width="3" height="6" fill="#1A1A1A"/>
+            <!-- سر -->
+            <circle cx="30" cy="24" r="8" fill="#E8B59E"/>
+            <!-- مو مشکی نامرتب -->
+            <path d="M 22 22 Q 30 12 38 22 L 36 26 Q 34 14 30 16 Q 26 14 24 26 Z" fill="#0A0A0A"/>
+            <!-- شاخ‌ها -->
+            <polygon points="22,18 24,12 26,18" fill="#A32D2D"/>
+            <polygon points="34,18 36,12 38,18" fill="#A32D2D"/>
+            <!-- چشم‌های قرمز -->
+            <circle cx="27" cy="24" r="1.6" fill="#FFFFFF"/>
+            <circle cx="33" cy="24" r="1.6" fill="#FFFFFF"/>
+            <circle cx="27" cy="24" r="0.9" fill="#A32D2D"/>
+            <circle cx="33" cy="24" r="0.9" fill="#A32D2D"/>
+            <!-- ابرو -->
+            <line x1="25" y1="20" x2="29" y2="22" stroke="#0A0A0A" stroke-width="1.2"/>
+            <line x1="31" y1="22" x2="35" y2="20" stroke="#0A0A0A" stroke-width="1.2"/>
+            <!-- پوزخند -->
+            <path d="M 27 29 Q 30 27 33 29" stroke="#5C0E0E" stroke-width="1" fill="none"/>
+          </svg>
+        </div>
+        <div class="char-info">
+          <div class="char-name char-alireza-name">😈 Alireza</div>
+          <div class="char-desc">Surgit pour vous compliquer la tâche.<br><span class="char-tip">Il jette un <strong>piège</strong> sur votre chemin !</span></div>
+        </div>
+      </div>
+    </div>
+    <input id="nameInput" type="text" maxlength="20" placeholder="Votre prénom…">
+    <div>
+      <button id="startBtn" type="button">🚀 Commencer l'aventure</button>
+    </div>
+    <div id="topScoresPreview" style="margin-top: 28px; padding-top: 24px; border-top: 1.5px solid #F0F0F0;"></div>
+  </div>
+
+  <!-- بازی اصلی (پنهان تا اسم وارد شه) -->
+  <div id="gameScreen" style="display: none;">
 
   <div class="stats">
+    <div class="stat"><div class="stat-label">Joueur</div><div class="stat-value" id="csPlayerName" style="font-size: 13px;">—</div></div>
     <div class="stat"><div class="stat-label">Score</div><div class="stat-value" id="cs1">0</div></div>
-    <div class="stat"><div class="stat-label">Concepts</div><div class="stat-value" id="cs2">0</div></div>
-    <div class="stat"><div class="stat-label">Vies</div><div class="stat-value" id="cs3">♥♥♥</div></div>
+    <div class="stat"><div class="stat-label">♥ Vies</div><div class="stat-value" id="cs3">♥♥♥</div></div>
+    <div class="stat"><div class="stat-label">Niveau</div><div class="stat-value" id="csLevel">1</div></div>
     <div class="stat"><div class="stat-label">Heure</div><div class="stat-value" id="cs4">🌅</div></div>
   </div>
 
-  <div id="help">↑ ou Espace = sauter (double-saut possible) · ↓ = se baisser · clic sur le terrain pour sauter</div>
+  <div id="help">↑ ou Espace = sauter (autant que vous voulez !) · ↓ = se baisser · clic sur le terrain pour sauter</div>
 
-  <canvas id="cs5" width="680" height="340"></canvas>
+  <div style="position: relative;">
+    <canvas id="cs5" width="680" height="340"></canvas>
+    <div id="hintBadge" style="position: absolute; top: 12px; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: 999px; font-size: 18px; font-weight: 700; background: rgba(255,255,255,0.97); border: 3px solid #D3D1C7; box-shadow: 0 4px 14px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.2s ease; pointer-events: none; white-space: nowrap; max-width: 90%;">
+      <span id="hintIcon"></span>
+      <span id="hintLabel" style="font-size: 20px;"></span>
+      <span id="hintAction" style="font-size: 13px; font-weight: 500; margin-left: 10px; opacity: 0.8;"></span>
+    </div>
+    <!-- ⚰️ Game Over overlay - روی canvas نمایش داده می‌شه -->
+    <div id="gameOverOverlay" style="position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(135deg, rgba(15,15,35,0.92) 0%, rgba(60,30,80,0.92) 100%); border-radius: 18px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); text-align: center; padding: 20px; box-sizing: border-box; animation: fadeIn 0.5s ease;">
+      <div id="gameOverIcon" style="font-size: 56px; line-height: 1; margin-bottom: 8px; animation: bounce 1.5s ease-in-out infinite;">🎮</div>
+      <div style="font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: white; letter-spacing: 1px; text-shadow: 0 4px 16px rgba(0,0,0,0.5); margin-bottom: 4px;">Game Over</div>
+      <div id="gameOverRank" style="font-family: 'Fredoka', sans-serif; font-size: 18px; color: #FFD966; font-weight: 600; margin-bottom: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.4);">—</div>
+      <div style="display: flex; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center;">
+        <div style="background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3); padding: 10px 18px; border-radius: 14px; backdrop-filter: blur(10px);">
+          <div style="font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Score</div>
+          <div id="gameOverScore" style="font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: white; line-height: 1.2;">0</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3); padding: 10px 18px; border-radius: 14px; backdrop-filter: blur(10px);">
+          <div style="font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Concepts</div>
+          <div id="gameOverConcepts" style="font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: white; line-height: 1.2;">0</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3); padding: 10px 18px; border-radius: 14px; backdrop-filter: blur(10px);">
+          <div style="font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Classement</div>
+          <div id="gameOverRankNum" style="font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: #FFD966; line-height: 1.2;">—</div>
+        </div>
+      </div>
+      <button id="gameOverRestartBtn" type="button" style="padding: 14px 32px; font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 600; background: linear-gradient(135deg, #1D9E75 0%, #2BB888 100%); color: white; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 8px 24px rgba(29,158,117,0.5); letter-spacing: 0.5px;">🔄 Rejouer</button>
+    </div>
+  </div>
 
   <div class="legend">
-    <div class="bad"><strong>À éviter :</strong> procrastination, plagiat, isolement…</div>
-    <div class="good"><strong>À attraper :</strong> scénarisation, e-learning, mémoire…</div>
+    <div class="bad"><strong>À éviter :</strong> procrastination, plagiat, burn-out, scroll infini, copier-IA…</div>
+    <div class="good"><strong>À attraper :</strong> ingénierie pédagogique, scénarisation, PIC, mémoire, learning expedition…</div>
   </div>
 
   <div class="controls">
@@ -162,12 +713,24 @@
     <button id="cs8" type="button">🔄 Recommencer</button>
   </div>
 
+  <!-- Leaderboard -->
+  <div id="leaderboard" style="display: none; margin-top: 16px; background: rgba(255,255,255,0.95); border-radius: 8px; padding: 16px; font-size: 14px;">
+    <div style="font-weight: 700; margin-bottom: 12px; font-size: 18px; color: #185FA5; text-align: center;">🏆 Top 10 — Classement CFTN Runner</div>
+    <div id="leaderboardList"></div>
+  </div>
+
   <div id="share">
     <div id="shareTitle"></div>
-    <div style="font-weight: 500; margin-bottom: 8px;">À copier pour LinkedIn :</div>
+    <div style="display: flex; gap: 10px; justify-content: center; margin: 16px 0; flex-wrap: wrap;">
+      <button id="restartBigBtn" type="button" style="padding: 14px 28px; font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 600; background: linear-gradient(135deg, #1D9E75 0%, #2BB888 100%); color: white; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 6px 18px rgba(29,158,117,0.4); transition: transform 0.15s ease;">🔄 Rejouer</button>
+      <button id="changeNameBtn" type="button" style="padding: 14px 24px; font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.95); color: #185FA5; border: 2px solid #185FA5; border-radius: 12px; cursor: pointer; transition: all 0.15s ease;">👤 Changer de joueur</button>
+    </div>
+    <div style="font-weight: 500; margin-bottom: 8px; margin-top: 14px;">📤 À copier pour LinkedIn :</div>
     <div id="shareText"></div>
     <button class="copy-btn" id="copyBtn" type="button">📋 Copier</button>
   </div>
+
+  </div><!-- end gameScreen -->
 
   <div class="footer">
     Master CFTN · Université de Strasbourg · INSPÉ<br>
@@ -181,36 +744,136 @@
   var ctx = canvas.getContext("2d");
   var W = 680, H = 340;
   var GROUND_Y = H - 55;
+  var itemCache = {};  // sprite cache آیتم‌ها
 
-  var OBSTACLES = [
-    { label: "Procrastination", color: "#D85A30", emoji: "🦥" },
-    { label: "Plagiat",         color: "#A32D2D", emoji: "⛔" },
-    { label: "Absentéisme",     color: "#993C1D", emoji: "🚪" },
-    { label: "Isolement",       color: "#A32D2D", emoji: "😶" },
-    { label: "TikTok",          color: "#D4537E", emoji: "📱" },
-    { label: "Nuit blanche",    color: "#993C1D", emoji: "🌙" },
-    { label: "Désorganisation", color: "#E24B4A", emoji: "🌀" },
-    { label: "Junk food",       color: "#D85A30", emoji: "🍔" },
-    { label: "Copier-coller",   color: "#A32D2D", emoji: "📋" }
+  // 🖥️ HiDPI / Retina support — برای متن واضح روی صفحه‌نمایش‌های مدرن
+  function setupCanvasHiDPI() {
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    var displayW = rect.width > 0 ? rect.width : canvas.offsetWidth || W;
+    var displayH = rect.height > 0 ? rect.height : canvas.offsetHeight || H;
+    // اندازه‌ی native canvas با pixel ratio
+    canvas.width = Math.round(displayW * dpr);
+    canvas.height = Math.round(displayH * dpr);
+    canvas.style.width = displayW + "px";
+    canvas.style.height = displayH + "px";
+    // scale طوری که coordinate system همون W, H بمونه
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    var scaleX = (displayW * dpr) / W;
+    var scaleY = (displayH * dpr) / H;
+    ctx.scale(scaleX, scaleY);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    // ⚡ effectiveScale = چقدر یک "واحد" در coordinate system به native pixel ها مپ می‌شه
+    effectiveScale = scaleX;
+    // پاک کردن cache آیتم‌ها چون scale تغییر کرده
+    itemCache = {};
+  }
+  // setup بعد از این که DOM render شد
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupCanvasHiDPI);
+  } else {
+    // یه frame صبر کن تا layout انجام بشه
+    requestAnimationFrame(setupCanvasHiDPI);
+  }
+  // وقتی پنجره resize شد، دوباره setup کن
+  var resizeTimer;
+  window.addEventListener("resize", function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(setupCanvasHiDPI, 200);
+  });
+
+  // 🟢 BONUSES — فقط لغات تأیید‌شده از mastercftn.com/le-programme و سایت رسمی Unistra
+  var BONUSES = [
+    // UE 1.1 - Fondamentaux théoriques et pratiques de formation
+    { label: "Psychologie éducation", color: "#378ADD", emoji: "🧠" },
+    { label: "Socio-pédagogie",       color: "#378ADD", emoji: "👥" },
+    { label: "Théories du changement",color: "#7F77DD", emoji: "🔄" },
+    // UE 1.2 - Ingénierie pédagogique et innovation
+    { label: "Ingénierie pédagogique",color: "#1D9E75", emoji: "🛠️" },
+    { label: "Ingénierie de formation",color: "#1D9E75", emoji: "📐" },
+    { label: "Formation à distance",  color: "#378ADD", emoji: "🌐" },
+    { label: "Pédagogie innovante",   color: "#7F77DD", emoji: "✨" },
+    // UE 1.3 - Méthodologies de recherche
+    { label: "Recherche éducation",   color: "#BA7517", emoji: "🔬" },
+    { label: "Méthodes qualitatives", color: "#BA7517", emoji: "📝" },
+    { label: "Méthodes quantitatives",color: "#BA7517", emoji: "📊" },
+    // UE 1.4 - DDRS (Développement durable et responsabilité sociétale)
+    { label: "Inclusion",             color: "#1D9E75", emoji: "🤝" },
+    { label: "Accessibilité",         color: "#1D9E75", emoji: "♿" },
+    { label: "Participation sociale", color: "#1D9E75", emoji: "🌍" },
+    { label: "Responsabilité sociétale", color: "#1D9E75", emoji: "💚" },
+    { label: "Développement durable", color: "#1D9E75", emoji: "🌱" },
+    { label: "Transition écologique", color: "#1D9E75", emoji: "🌿" },
+    // UE 2.1 - Technologies numériques pour l'apprentissage
+    { label: "Technologies numériques", color: "#378ADD", emoji: "💻" },
+    // UE 2.2 - Intervention en milieu professionnel
+    { label: "Gestion de projet",     color: "#BA7517", emoji: "📋" },
+    { label: "Appel à projet",        color: "#BA7517", emoji: "📨" },
+    { label: "Développement org.",    color: "#BA7517", emoji: "🏢" },
+    // UE 2.3 - Ateliers méthodologiques
+    { label: "Mémoire",               color: "#7F77DD", emoji: "📖" },
+    { label: "Veille documentaire",   color: "#BA7517", emoji: "🔍" },
+    // UE 2.5 - Analyse des processus d'apprentissage
+    { label: "Théorie apprentissage", color: "#7F77DD", emoji: "🎓" },
+    { label: "Théorie de l'activité", color: "#7F77DD", emoji: "⚡" },
+    // M2 - UE 3.1 - Enjeux et défis
+    { label: "Entreprendre éducation",color: "#BA7517", emoji: "🚀" },
+    { label: "Learning expedition",   color: "#378ADD", emoji: "✈️" },
+    // UE 3.2 - Accompagnement de la transformation
+    { label: "Connaissance de soi",   color: "#7F77DD", emoji: "🪞" },
+    { label: "Gestion des émotions",  color: "#D4537E", emoji: "💗" },
+    { label: "Leadership",            color: "#BA7517", emoji: "🌟" },
+    // UE 3.3 - Méthodes de recherches
+    { label: "Conduite de recherche", color: "#BA7517", emoji: "🔬" },
+    // UE 3.4 - e-Learning
+    { label: "e-Learning",            color: "#378ADD", emoji: "💻" },
+    { label: "Conception modules",    color: "#1D9E75", emoji: "🧩" },
+    { label: "Scénarisation péd.",    color: "#1D9E75", emoji: "🎬" },
+    { label: "Design péd.",           color: "#1D9E75", emoji: "✏️" },
+    { label: "Design graphique",      color: "#7F77DD", emoji: "🎨" },
+    { label: "Communication visuelle",color: "#7F77DD", emoji: "👁️" },
+    // UE 3.5 - Analyse des environnements d'apprentissage
+    { label: "Expertise conception",  color: "#1D9E75", emoji: "⚙️" },
+    { label: "Évaluation des acquis", color: "#BA7517", emoji: "✅" },
+    // UE 4.1 - Projets collectifs
+    { label: "PIC",                   color: "#7F77DD", emoji: "💡" },
+    { label: "Communication orale",   color: "#378ADD", emoji: "🎤" },
+    { label: "Expression corporelle", color: "#378ADD", emoji: "🕺" },
+    // Méthodes pédagogiques (mastercftn.com)
+    { label: "Ateliers",              color: "#1D9E75", emoji: "🔨" },
+    { label: "Mise en situation",     color: "#1D9E75", emoji: "🎭" },
+    { label: "Pédagogie par projet",  color: "#378ADD", emoji: "📊" },
+    { label: "Jeux de rôle",          color: "#7F77DD", emoji: "🎮" },
+    { label: "Apprent. collaboratif", color: "#378ADD", emoji: "👥" },
+    // Concepts CFTN du site officiel
+    { label: "Stage",                 color: "#BA7517", emoji: "🏢" },
+    { label: "Innovation",            color: "#7F77DD", emoji: "🚀" },
+    { label: "Réflexivité",           color: "#7F77DD", emoji: "🪞" },
+    { label: "IA générative",         color: "#7F77DD", emoji: "🤖" },
+    // Compétences mentionnées
+    { label: "Conception",            color: "#1D9E75", emoji: "✏️" },
+    { label: "Expérimenter",          color: "#7F77DD", emoji: "🧪" },
+    { label: "Incarner",              color: "#BA7517", emoji: "🌟" },
+    { label: "Posture professionnelle",color: "#BA7517", emoji: "👔" },
+    { label: "Travail collaboratif",  color: "#378ADD", emoji: "🤝" },
+    { label: "Prise d'initiative",    color: "#BA7517", emoji: "⚡" }
   ];
 
-  var BONUSES = [
-    { label: "Scénarisation",  color: "#1D9E75", emoji: "🎬" },
-    { label: "e-Learning",     color: "#378ADD", emoji: "💻" },
-    { label: "Mémoire",        color: "#7F77DD", emoji: "📖" },
-    { label: "Stage",          color: "#BA7517", emoji: "🏢" },
-    { label: "PIC",            color: "#7F77DD", emoji: "💡" },
-    { label: "Leadership",     color: "#BA7517", emoji: "🌟" },
-    { label: "Pédago active",  color: "#378ADD", emoji: "🎯" },
-    { label: "Design péd.",    color: "#1D9E75", emoji: "✏️" },
-    { label: "Inclusion",      color: "#1D9E75", emoji: "🤝" },
-    { label: "Innovation",     color: "#7F77DD", emoji: "🚀" },
-    { label: "Veille techno",  color: "#BA7517", emoji: "🔍" },
-    { label: "Réflexivité",    color: "#7F77DD", emoji: "🪞" },
-    { label: "Learning Exp.",  color: "#378ADD", emoji: "✈️" },
-    { label: "Accessibilité",  color: "#1D9E75", emoji: "♿" },
-    { label: "Collaboratif",   color: "#378ADD", emoji: "👥" },
-    { label: "Curiosité",      color: "#BA7517", emoji: "🧠" }
+  // 🔴 OBSTACLES — فقط چیزهای بدون تردید منفی
+  var OBSTACLES = [
+    // اکادمیک منفی واقعی
+    { label: "Procrastination",   color: "#D85A30", emoji: "🦥" },
+    { label: "Plagiat",           color: "#A32D2D", emoji: "⛔" },
+    { label: "Absentéisme",       color: "#993C1D", emoji: "🚪" },
+    { label: "Désorganisation",   color: "#E24B4A", emoji: "🌀" },
+    // اتلاف وقت (بدون استفاده‌ی هدفمند)
+    { label: "Scroll infini",     color: "#D4537E", emoji: "📱" },
+    // سلامت روانی منفی
+    { label: "Burn-out",          color: "#993C1D", emoji: "🔥" },
+    { label: "Isolement",         color: "#A32D2D", emoji: "😶" },
+    // استفاده‌ی نادرست از IA
+    { label: "Copier-IA",         color: "#A32D2D", emoji: "🤖" }
   ];
 
   var SKY = [
@@ -227,16 +890,25 @@
       running: true,
       player: { x: 80, y: GROUND_Y, vy: 0, w: 30, h: 46, onGround: true, jumpsLeft: 2, ducking: false, runFrame: 0, emotion: "neutral", emotionTimer: 0, hairWave: 0 },
       items: [], score: 0, concepts: 0, lives: 3,
-      speed: 3.0, spawnCd: 90,
+      speed: 2, spawnCd: 150,
       groundOffset: 0, farOffset: 0, midOffset: 0, nearOffset: 0, cloudOffset: 0,
       flash: 0, flashColor: null,
       popups: [], particles: [], dustTimer: 0, timePhase: 0, stars: [],
       cigognes: [{ x: 100, y: 70, phase: 0 }, { x: 320, y: 50, phase: 1 }, { x: 540, y: 80, phase: 2 }],
+      viviana: null,            // پری جادویی، گاهی ظاهر می‌شه
+      vivianaCooldown: 600,     // اولین ظهور بعد از ۶۰۰ فریم (~ ۱۰ ثانیه)
+      alireza: null,            // شیطون که مانع اضافه می‌کنه
+      alirezaCooldown: 900,     // اولین ظهور بعد از ~ ۱۵ ثانیه
       shownEnd: false
     };
     for (var i = 0; i < 50; i++) state.stars.push({ x: Math.random() * W, y: Math.random() * GROUND_Y * 0.65, size: Math.random() * 1.5 + 0.5, twinkle: Math.random() * Math.PI * 2 });
     document.getElementById("share").style.display = "none";
+    var lb = document.getElementById("leaderboard"); if (lb) lb.style.display = "none";
+    var gov = document.getElementById("gameOverOverlay"); if (gov) gov.classList.remove("visible");
+    // ⚡ بعد از پنهان شدن overlay، اندازه canvas رو دوباره چک کن
+    setupCanvasHiDPI();
     lastTs = performance.now();
+    accumulator = 0;
     if (raf) cancelAnimationFrame(raf);
     raf = requestAnimationFrame(loop);
   }
@@ -250,70 +922,405 @@
     else if (fs >= 1000) { rank = "Diplômé·e avec mention"; icon = "🏆"; }
     else if (fs >= 500) { rank = "Master validé !"; icon = "🥇"; }
     else if (fs >= 200) { rank = "Encore quelques crédits ECTS…"; icon = "📚"; }
-    else { rank = "Faut s'accrocher !"; icon = "🌱"; }
-    document.getElementById("shareTitle").innerHTML = icon + " " + rank + "<br><span style='font-weight: 400; font-size: 14px;'>Score : " + fs + " · " + state.concepts + " concept" + (state.concepts > 1 ? "s" : "") + " attrapé" + (state.concepts > 1 ? "s" : "") + "</span>";
-    document.getElementById("shareText").textContent = "🏃 J'ai relevé le défi #CFTNRunner !\n\nScore : " + fs + " points\nConcepts attrapés : " + state.concepts + "\nNiveau : " + rank + "\n\nUn petit jeu pour découvrir le Master CFTN de l'Université de Strasbourg. À votre tour ! 🥨\n\n#MasterCFTN #IngénieriePédagogique #Unistra #Strasbourg #INSPE #LearningDesign";
+    else { rank = "Faut s'accrocher !"; icon = "💪"; }
+
+    // ذخیره در leaderboard
+    addScore(playerName, fs, state.concepts);
+    // پیدا کردن رتبه
+    var allScores = loadLeaderboard();
+    var myRank = -1;
+    for (var ri = 0; ri < allScores.length; ri++) {
+      if (allScores[ri].name === playerName && allScores[ri].score === fs) {
+        myRank = ri + 1; break;
+      }
+    }
+    var rankText = "";
+    if (myRank > 0 && myRank <= 10) {
+      rankText = "<br><span style='color: #BA7517; font-weight: 600;'>🎯 Vous êtes #" + myRank + " du Top 10 !</span>";
+    } else if (myRank > 0) {
+      rankText = "<br><span style='color: #888; font-size: 12px;'>Votre rang : #" + myRank + "</span>";
+    }
+
+    // ⚰️ نمایش overlay روی canvas
+    document.getElementById("gameOverIcon").textContent = icon;
+    document.getElementById("gameOverRank").textContent = rank;
+    document.getElementById("gameOverScore").textContent = fs;
+    document.getElementById("gameOverConcepts").textContent = state.concepts;
+    document.getElementById("gameOverRankNum").textContent = myRank > 0 ? "#" + myRank : "—";
+    document.getElementById("gameOverOverlay").classList.add("visible");
+
+    document.getElementById("shareTitle").innerHTML = icon + " " + rank + "<br><span style='font-weight: 400; font-size: 14px;'>" + escapeHtml(playerName) + " · Score : " + fs + " · " + state.concepts + " concept" + (state.concepts > 1 ? "s" : "") + " attrapé" + (state.concepts > 1 ? "s" : "") + "</span>" + rankText;
+    document.getElementById("shareText").textContent = "🏃 " + playerName + " a relevé le défi #CFTNRunner !\n\nScore : " + fs + " points\nConcepts attrapés : " + state.concepts + "\nNiveau : " + rank + (myRank > 0 && myRank <= 10 ? "\nClassement : #" + myRank + " du Top 10" : "") + "\n\nUn petit jeu pour découvrir le Master CFTN de l'Université de Strasbourg. À votre tour ! 🥨\n\n#MasterCFTN #IngénieriePédagogique #Unistra #Strasbourg #INSPE #LearningDesign";
     document.getElementById("share").style.display = "block";
+
+    // نمایش leaderboard
+    document.getElementById("leaderboard").style.display = "block";
+    renderLeaderboard(document.getElementById("leaderboardList"), playerName);
+
+    var hb = document.getElementById("hintBadge"); if (hb) hb.style.opacity = "0";
   }
 
   function jump() {
     if (!state || !state.running) return;
     var p = state.player;
-    if (p.jumpsLeft > 0) {
-      p.vy = -11; p.onGround = false; p.jumpsLeft--; p.ducking = false;
-      for (var i = 0; i < 8; i++) state.particles.push({ x: p.x + 15 + (Math.random() - 0.5) * 20, y: GROUND_Y - 2, vx: (Math.random() - 0.5) * 4, vy: -Math.random() * 2, life: 20, maxLife: 20, color: "#A88560", size: Math.random() * 3 + 2, type: "dust" });
-    }
+    // پرش بدون محدودیت — هر چقدر بزنی، می‌پره
+    p.vy = -11; p.onGround = false; p.ducking = false;
+    for (var i = 0; i < 8; i++) state.particles.push({ x: p.x + 15 + (Math.random() - 0.5) * 20, y: GROUND_Y - 2, vx: (Math.random() - 0.5) * 4, vy: -Math.random() * 2, life: 20, maxLife: 20, color: "#A88560", size: Math.random() * 3 + 2, type: "dust" });
   }
 
   function duck(a) { if (state && state.running) state.player.ducking = a && state.player.onGround; }
 
   function spawn() {
+    // توزیع تنوع:
+    // - ۳۰٪ بونوس زمینی
+    // - ۲۰٪ بونوس پرنده
+    // - ۲۵٪ مانع زمینی
+    // - ۲۵٪ مانع پرنده
     var r = Math.random();
     var isBonus, flying;
-    if (r < 0.5) { isBonus = true; flying = Math.random() < 0.5; }
-    else if (r < 0.78) { isBonus = false; flying = false; }
-    else { isBonus = false; flying = true; }
+    if (r < 0.30)      { isBonus = true;  flying = false; }
+    else if (r < 0.50) { isBonus = true;  flying = true;  }
+    else if (r < 0.75) { isBonus = false; flying = false; }
+    else               { isBonus = false; flying = true;  }
+
     var pool = isBonus ? BONUSES : OBSTACLES;
     var d = pool[Math.floor(Math.random() * pool.length)];
-    var y = isBonus ? (flying ? GROUND_Y - 80 : GROUND_Y) : (flying ? GROUND_Y - 52 : GROUND_Y);
-    var tw = d.label.length * 8.5 + 50;
-    state.items.push({ type: isBonus ? "bonus" : "obstacle", label: d.label, color: d.color, emoji: d.emoji, x: W + 20, y: y, w: Math.max(90, tw), h: isBonus ? 36 : 40, hit: false, flying: flying, pulse: 0, bobOffset: Math.random() * Math.PI * 2 });
+
+    var y, h;
+    if (isBonus) {
+      h = 40;
+      // بونوس flying: متوسط بالا (پلیر باید بپره)
+      y = flying ? (GROUND_Y - 75) : GROUND_Y;
+    } else {
+      h = 40;
+      // مانع flying: پایین (پلیر باید خم بشه)
+      y = flying ? (GROUND_Y - 26) : GROUND_Y;
+      if (flying) h = 24;  // ارتفاع کوتاه برای collision دقیق
+    }
+    var tw = d.label.length * 11 + 70;
+    state.items.push({
+      type: isBonus ? "bonus" : "obstacle",
+      label: d.label, color: d.color, emoji: d.emoji,
+      x: W + 20, y: y,
+      w: Math.max(110, tw), h: h,
+      hit: false, flying: flying,
+      pulse: 0, bobOffset: Math.random() * Math.PI * 2
+    });
   }
 
-  function pBox() { var p = state.player; if (p.ducking) return { x: p.x, y: p.y, w: p.w + 8, h: 24 }; return { x: p.x, y: p.y, w: p.w, h: p.h }; }
-  function hit(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y - a.h < b.y && a.y > b.y - b.h; }
+  function pBox() {
+    var p = state.player;
+    if (p.ducking) return { x: p.x, top: p.y - 24, bottom: p.y, w: p.w + 8 };
+    return { x: p.x, top: p.y - p.h, bottom: p.y, w: p.w };
+  }
+  function iBox(it) {
+    // y همیشه position پایین آیتم رو نشون می‌ده، ارتفاع به سمت بالا
+    return { x: it.x, top: it.y - it.h, bottom: it.y, w: it.w };
+  }
+  function hit(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.top < b.bottom && a.bottom > b.top;
+  }
 
+  var accumulator = 0;
+  var FIXED_DT = 1000 / 60;  // ۶۰ فریم در ثانیه ثابت
   function loop(ts) {
     if (!state || !state.running) return;
-    var dt = Math.min(32, ts - lastTs);
+    var elapsed = Math.min(100, ts - lastTs);  // اگه tab background بوده، spike رو محدود کن
     lastTs = ts;
-    update(dt);
+    accumulator += elapsed;
+    // اجرای update با گام‌های ثابت — حذف stutter
+    var safety = 0;
+    while (accumulator >= FIXED_DT && safety < 5) {
+      update(FIXED_DT);
+      accumulator -= FIXED_DT;
+      safety++;
+    }
     render();
+    updateHint();
     raf = requestAnimationFrame(loop);
+  }
+
+  function updateHint() {
+    var badge = document.getElementById("hintBadge");
+    if (!badge) return;
+    if (!state || !state.items) { badge.style.opacity = "0"; return; }
+    // پیدا کردن نزدیک‌ترین آیتم که هنوز گرفته نشده
+    var next = null;
+    for (var i = 0; i < state.items.length; i++) {
+      var it = state.items[i];
+      if (!it || it.hit) continue;
+      if (typeof it.x !== "number" || typeof it.w !== "number") continue;
+      if (it.x + it.w < state.player.x) continue;
+      if (!next || it.x < next.x) next = it;
+    }
+    if (!next || !next.emoji || !next.label) { badge.style.opacity = "0"; return; }
+    var dist = next.x - state.player.x;
+    // فقط وقتی توی محدوده‌ی ۴۵۰ پیکسلی نزدیک شد نشون بده
+    if (dist > 450) { badge.style.opacity = "0"; return; }
+
+    var isBonus = next.type === "bonus";
+    var action;
+    if (isBonus) action = next.flying ? "→ sautez pour l'attraper !" : "→ courez dessus !";
+    else action = next.flying ? "→ BAISSEZ-VOUS !" : "→ SAUTEZ !";
+
+    document.getElementById("hintIcon").textContent = next.emoji + " ";
+    document.getElementById("hintLabel").textContent = next.label;
+    document.getElementById("hintLabel").style.color = next.color;
+    document.getElementById("hintAction").textContent = action;
+    document.getElementById("hintAction").style.color = isBonus ? "#0F6E56" : "#A32D2D";
+    badge.style.borderColor = next.color;
+    badge.style.opacity = "1";
   }
 
   function update(dt) {
     var p = state.player;
     p.vy += 0.6; p.y += p.vy;
     if (p.y >= GROUND_Y) { p.y = GROUND_Y; p.vy = 0; p.onGround = true; p.jumpsLeft = 2; }
-    state.speed = 3.0 + Math.min(2.5, state.score / 600);
+    // سرعت پایین برای خوانایی متن هنگام حرکت
+    state.speed = Math.round(2 + Math.min(3, state.score / 700));
     p.runFrame += state.speed * 0.06; p.hairWave += 0.15;
     state.timePhase = (state.score / 200) % 4;
-    document.getElementById("cs4").textContent = SKY[Math.floor(state.timePhase)].emoji;
+    if (state.timePhase < 0) state.timePhase += 4;
+    var skyIdx = Math.floor(state.timePhase) % 4;
+    if (skyIdx < 0) skyIdx = 0;
+    var skyEntry = SKY[skyIdx];
+    if (skyEntry) document.getElementById("cs4").textContent = skyEntry.emoji;
+    // Niveau: هر ۳۰۰ امتیاز یه لول جدید
+    var lvl = Math.floor(state.score / 300) + 1;
+    var lvlEl = document.getElementById("csLevel");
+    if (lvlEl) lvlEl.textContent = lvl;
 
     state.spawnCd--;
-    if (state.spawnCd <= 0) { spawn(); state.spawnCd = 110 + Math.floor(Math.random() * 50) - Math.min(25, state.score / 100); }
+    if (state.spawnCd <= 0) {
+      spawn();
+      // فاصله‌ی spawn: در مرحله‌ی ۱ زیاد، با امتیاز کم‌تر می‌شه
+      // شروع: ~۱۸۰ فریم (۳ ثانیه)، پایان: ~۶۰ فریم (۱ ثانیه)
+      var spawnGap = Math.max(60, 180 - state.score / 30);
+      state.spawnCd = spawnGap + Math.floor(Math.random() * 40);
+    }
 
     for (var ci = 0; ci < state.cigognes.length; ci++) {
       var c = state.cigognes[ci]; c.x -= state.speed * 0.3; c.phase += 0.15;
       if (c.x < -50) { c.x = W + 50; c.y = 40 + Math.random() * 60; }
     }
 
+    // ✨ VIVIANA — از راست میاد، قلب می‌اندازه، می‌ره
+    // ⚠️ همزمان با Alireza ظاهر نمی‌شه
+    if (!state.viviana && !state.alireza) {
+      state.vivianaCooldown--;
+      if (state.vivianaCooldown <= 0) {
+        if (Math.random() < 0.3) {
+          state.viviana = {
+            mode: "approach",      // approach → drop → retreat
+            x: W + 60, y: 90,      // از راست بیرون از canvas
+            targetX: 0, targetY: 0,
+            phase: 0, sparkleTimer: 0,
+            heart: null,
+            deliverTimer: 0,
+            done: false
+          };
+          state.vivianaCooldown = 700 + Math.floor(Math.random() * 500);
+        } else {
+          state.vivianaCooldown = 200;
+        }
+      }
+    } else if (state.viviana) {
+      var v = state.viviana;
+      v.phase += 0.12;
+      v.sparkleTimer++;
+
+      if (v.mode === "approach") {
+        // 🎯 هدف: یه نقطه‌ی جلوتر از پلیر روی صفحه - تا قلب جلوش بیفته
+        v.targetX = state.player.x + 220;  // ۲۲۰px جلوتر از پلیر
+        v.targetY = 110;
+        v.x += (v.targetX - v.x) * 0.05;
+        v.y += (v.targetY - v.y) * 0.05 + Math.sin(v.phase) * 0.3;
+        var dx = v.x - v.targetX, dy = v.y - v.targetY;
+        if (dx * dx + dy * dy < 400) {
+          v.mode = "drop";
+          v.deliverTimer = 0;
+          // قلب جلوی پاهای Viviana ظاهر می‌شه
+          v.heart = { x: v.x, y: v.y + 15, scale: 0, vy: 0, dropped: false };
+        }
+      }
+      else if (v.mode === "drop") {
+        v.deliverTimer++;
+        // مرحله ۱: قلب آماده می‌شه (انیمیشن ظاهر شدن)
+        if (v.deliverTimer < 25 && v.heart) {
+          v.heart.scale = Math.min(1, v.deliverTimer / 18);
+          v.heart.x = v.x;
+          v.heart.y = v.y + 15;
+        }
+        // مرحله ۲: قلب رو می‌اندازه - حالا قلب در ارتفاع شناور باقی می‌مونه
+        if (v.deliverTimer === 25 && v.heart) {
+          v.heart.dropped = true;
+          // ارتفاع شناور قلب - در محدوده‌ی قابل گرفتن با پرش
+          v.heart.baseY = GROUND_Y - 55;  // ارتفاع مناسب برای پرش
+          v.heart.displayY = v.heart.baseY;
+          v.heart.rotation = 0;
+          v.heart.bob = 0;
+          state.popups.push({ x: v.x, y: v.y - 30, txt: "✨ Attrapez le cœur !", color: "#D4537E", life: 80 });
+          // ذرات جرقه
+          for (var spi = 0; spi < 10; spi++) {
+            var sang = Math.random() * Math.PI * 2;
+            var ssp = Math.random() * 2 + 0.5;
+            state.particles.push({ x: v.heart.x, y: v.heart.baseY, vx: Math.cos(sang) * ssp, vy: Math.sin(sang) * ssp, life: 25, maxLife: 25, color: "#FFD966", size: Math.random() * 2 + 1.5, type: "spark" });
+          }
+        }
+        // مرحله ۳: قلب شناور در ارتفاع - با چرخش و حرکت همراه دنیا
+        if (v.heart && v.heart.dropped) {
+          // حرکت همراه دنیا (به سمت چپ مثل سایر آیتم‌ها)
+          v.heart.x -= state.speed;
+          // چرخش ملایم
+          v.heart.rotation = (v.heart.rotation || 0) + 0.08;
+          // bobbing عمودی - ارتفاع ثابت در هوا
+          v.heart.bob = (v.heart.bob || 0) + 0.12;
+          v.heart.displayY = v.heart.baseY + Math.sin(v.heart.bob) * 6;
+          // ذرات دنبال
+          if (v.sparkleTimer % 4 === 0) {
+            state.particles.push({ x: v.heart.x, y: v.heart.displayY, vx: (Math.random() - 0.5) * 1, vy: -Math.random() * 0.5, life: 18, maxLife: 18, color: "#FF6B9D", size: Math.random() * 2 + 1, type: "spark" });
+          }
+
+          // برخورد با پلیر - hitbox دور قلب
+          var pCheck = pBox();
+          var heartSize = 14;
+          var hbox = {
+            x: v.heart.x - heartSize, top: v.heart.displayY - heartSize,
+            bottom: v.heart.displayY + heartSize, w: heartSize * 2
+          };
+          if (hit(pCheck, hbox)) {
+            // ❤️ پلیر قلب رو گرفت!
+            if (state.lives < 5) state.lives++;
+            state.score += 100;
+            state.flash = 14;
+            state.flashColor = "rgba(212, 83, 126, 0.3)";
+            state.player.emotion = "happy"; state.player.emotionTimer = 50;
+            state.popups.push({ x: state.player.x + 15, y: state.player.y - 60, txt: "+♥  +100", color: "#D4537E", life: 60 });
+            // افکت ذرات تبریک
+            for (var hpi = 0; hpi < 25; hpi++) {
+              var hang = Math.random() * Math.PI * 2;
+              var hsp = Math.random() * 4 + 2;
+              state.particles.push({ x: v.heart.x, y: v.heart.displayY, vx: Math.cos(hang) * hsp, vy: Math.sin(hang) * hsp - 1, life: 40, maxLife: 40, color: ["#FF6B9D", "#E84A5F", "#FFD966", "#FFFFFF"][Math.floor(Math.random() * 4)], size: Math.random() * 4 + 2, type: "spark" });
+            }
+            hud();
+            v.heart = null;
+          }
+
+          // اگه قلب از صفحه خارج شد (پلیر نگرفت)
+          if (v.heart && v.heart.x < -30) {
+            v.heart = null;
+          }
+        }
+
+        // اگه قلب دیگه وجود نداره (گرفته شده یا خارج شده)، Viviana بره
+        if (!v.heart && v.deliverTimer > 30) {
+          v.mode = "retreat";
+        }
+      }
+      else if (v.mode === "retreat") {
+        // به سمت بالا-راست خارج می‌شه
+        v.x += 2 + state.speed * 0.3;
+        v.y -= 1.5;
+        v.y += Math.sin(v.phase) * 0.3;
+        if (v.x > W + 60 || v.y < -50) {
+          state.viviana = null;
+        }
+      }
+    }
+
+    // 😈 ALIREZA — شیطون که میاد و مانع اضافه می‌کنه (بیشتر با امتیاز بالا)
+    // ⚠️ همزمان با Viviana ظاهر نمی‌شه
+    if (!state.alireza && !state.viviana) {
+      state.alirezaCooldown--;
+      if (state.alirezaCooldown <= 0) {
+        // احتمال ظهور با امتیاز بیشتر می‌شه: ۳۰٪ → ۷۰٪
+        var alirezaChance = Math.min(0.7, 0.30 + state.score / 3000);
+        if (Math.random() < alirezaChance) {
+          state.alireza = {
+            mode: "approach",
+            x: W + 60, y: 110,    // از راست بیرون از canvas (مثل Viviana)
+            targetX: 0, targetY: 0,
+            phase: 0, sparkleTimer: 0,
+            evilItem: null,
+            deliverTimer: 0
+          };
+          // cooldown کوتاه‌تر با امتیاز: از ۹۰۰ به ۴۰۰
+          var alirezaCd = Math.max(400, 900 - state.score / 5);
+          state.alirezaCooldown = alirezaCd + Math.floor(Math.random() * 400);
+        } else {
+          state.alirezaCooldown = 200;
+        }
+      }
+    } else if (state.alireza) {
+      var a = state.alireza;
+      a.phase += 0.1;
+      a.sparkleTimer++;
+
+      if (a.mode === "approach") {
+        // 🎯 هدف: یه نقطه‌ی جلوتر از پلیر تا مانع رو جلوی پلیر بذاره
+        a.targetX = state.player.x + 240;  // جلوتر از پلیر
+        a.targetY = 110;
+        a.x += (a.targetX - a.x) * 0.05;
+        a.y += (a.targetY - a.y) * 0.05 + Math.sin(a.phase) * 0.4;
+        var adx = a.x - a.targetX, ady = a.y - a.targetY;
+        if (adx * adx + ady * ady < 500) {
+          a.mode = "deliver";
+          a.deliverTimer = 0;
+          var ev = OBSTACLES[Math.floor(Math.random() * OBSTACLES.length)];
+          a.evilItem = { label: ev.label, color: ev.color, emoji: ev.emoji, scale: 0, x: a.x, y: a.y + 15 };
+        }
+      }
+      else if (a.mode === "deliver") {
+        a.deliverTimer++;
+        if (a.deliverTimer < 25 && a.evilItem) {
+          a.evilItem.scale = Math.min(1, a.deliverTimer / 20);
+          a.evilItem.x = a.x;
+          a.evilItem.y = a.y + 15;
+        }
+        // در فریم ۲۵، مانع رو دقیقاً جلوی پلیر می‌اندازه
+        if (a.deliverTimer === 25 && a.evilItem) {
+          var ev = a.evilItem;
+          var tw = ev.label.length * 11 + 70;
+          var flying = Math.random() < 0.3;
+          var spawnY = flying ? (GROUND_Y - 26) : GROUND_Y;
+          var spawnH = flying ? 24 : 40;
+          state.items.push({
+            type: "obstacle",
+            label: ev.label, color: ev.color, emoji: ev.emoji,
+            x: a.x,    // ✅ دقیقاً جای فعلی Alireza (جلوی پلیر)
+            y: spawnY,
+            w: Math.max(110, tw), h: spawnH,
+            hit: false, flying: flying,
+            pulse: 0, bobOffset: Math.random() * Math.PI * 2,
+            fromAlireza: true
+          });
+          // افکت ذرات قرمز
+          for (var asi = 0; asi < 15; asi++) {
+            var aang = Math.random() * Math.PI * 2;
+            var aSp = Math.random() * 3 + 1;
+            state.particles.push({ x: a.x, y: a.y + 15, vx: Math.cos(aang) * aSp, vy: Math.sin(aang) * aSp - 1, life: 30, maxLife: 30, color: "#A32D2D", size: Math.random() * 3 + 2, type: "smoke" });
+          }
+          state.popups.push({ x: a.x, y: a.y - 35, txt: "😈 Bon courage !", color: "#A32D2D", life: 70 });
+          a.evilItem = null;
+          a.mode = "retreat";
+        }
+      }
+      else if (a.mode === "retreat") {
+        // به سمت راست-بالا خارج می‌شه (همون جهت Viviana)
+        a.x += 2 + state.speed * 0.5;
+        a.y -= 0.8;
+        a.y += Math.sin(a.phase) * 0.3;
+        if (a.x > W + 60 || a.y < -50) {
+          state.alireza = null;
+        }
+      }
+    }
+
     var pb = pBox();
     for (var i = 0; i < state.items.length; i++) {
       var it = state.items[i];
       it.x -= state.speed; it.pulse += 0.1;
-      if (!it.hit && hit(pb, it)) {
+      if (!it.hit && hit(pb, iBox(it))) {
         it.hit = true;
         if (it.type === "bonus") {
           state.score += 50; state.concepts++;
@@ -326,8 +1333,9 @@
           p.emotion = "happy"; p.emotionTimer = 30;
         } else {
           state.lives--;
+          state.score = Math.max(0, state.score - 100);  // ⛔ پنالتی ۱۰۰ امتیاز برای برخورد به مانع
           state.flash = 14; state.flashColor = "rgba(226, 75, 74, 0.4)";
-          state.popups.push({ x: it.x + it.w/2, y: it.y - 45, txt: "-1 ♥", color: "#A32D2D", life: 50 });
+          state.popups.push({ x: it.x + it.w/2, y: it.y - 45, txt: "-1 ♥  -100", color: "#A32D2D", life: 50 });
           for (var si = 0; si < 14; si++) state.particles.push({ x: it.x + it.w/2 + (Math.random() - 0.5) * 30, y: it.y - it.h/2 + (Math.random() - 0.5) * 20, vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6 - 2, life: 25, maxLife: 25, color: "#E24B4A", size: Math.random() * 4 + 2, type: "smoke" });
           p.emotion = "scared"; p.emotionTimer = 40;
           if (state.lives <= 0) { hud(); endGame(); return; }
@@ -369,15 +1377,37 @@
     state.cloudOffset = (state.cloudOffset + state.speed * 0.2) % 300;
   }
 
+  function parseColor(c) {
+    if (typeof c !== "string") return [128, 128, 128];
+    if (c[0] === "#") {
+      var r = parseInt(c.slice(1,3), 16), g = parseInt(c.slice(3,5), 16), b = parseInt(c.slice(5,7), 16);
+      if (isNaN(r) || isNaN(g) || isNaN(b)) return [128, 128, 128];
+      return [r, g, b];
+    }
+    var m = c.match(/\d+/g);
+    if (!m || m.length < 3) return [128, 128, 128];
+    var r2 = parseInt(m[0]), g2 = parseInt(m[1]), b2 = parseInt(m[2]);
+    if (isNaN(r2) || isNaN(g2) || isNaN(b2)) return [128, 128, 128];
+    return [r2, g2, b2];
+  }
+
   function lerp(c1, c2, t) {
-    var r1 = parseInt(c1.slice(1,3), 16), g1 = parseInt(c1.slice(3,5), 16), b1 = parseInt(c1.slice(5,7), 16);
-    var r2 = parseInt(c2.slice(1,3), 16), g2 = parseInt(c2.slice(3,5), 16), b2 = parseInt(c2.slice(5,7), 16);
-    return "rgb(" + Math.round(r1+(r2-r1)*t) + "," + Math.round(g1+(g2-g1)*t) + "," + Math.round(b1+(b2-b1)*t) + ")";
+    var a = parseColor(c1), b = parseColor(c2);
+    return "rgb(" + Math.round(a[0]+(b[0]-a[0])*t) + "," + Math.round(a[1]+(b[1]-a[1])*t) + "," + Math.round(a[2]+(b[2]-a[2])*t) + ")";
   }
 
   function pal() {
-    var ph = state.timePhase, i = Math.floor(ph), ni = (i + 1) % 4, t = ph - i;
+    var ph = state.timePhase;
+    if (typeof ph !== "number" || isNaN(ph)) ph = 0;
+    if (ph < 0) ph = 0;
+    var i = Math.floor(ph) % 4;
+    if (i < 0) i = 0;
+    var ni = (i + 1) % 4;
+    var t = ph - Math.floor(ph);
+    if (t < 0) t = 0;
+    if (t > 1) t = 1;
     var p1 = SKY[i], p2 = SKY[ni];
+    if (!p1 || !p2) { p1 = SKY[0]; p2 = SKY[1]; }
     return { top: lerp(p1.top, p2.top, t), mid: lerp(p1.mid, p2.mid, t), bottom: lerp(p1.bottom, p2.bottom, t), sun: lerp(p1.sun, p2.sun, t), sunY: p1.sunY + (p2.sunY - p1.sunY) * t, ground: lerp(p1.ground, p2.ground, t), cathedral: lerp(p1.cathedral, p2.cathedral, t), colombage: lerp(p1.colombage, p2.colombage, t), wood: lerp(p1.wood, p2.wood, t), isNight: i === 3 || (i === 2 && t > 0.6) };
   }
 
@@ -439,6 +1469,8 @@
 
     for (var idi = 0; idi < state.items.length; idi++) drawItem(state.items[idi]);
     drawPlayer(state.player);
+    drawViviana();
+    drawAlireza();
 
     for (var psi = 0; psi < state.particles.length; psi++) {
       var p2 = state.particles[psi]; if (p2.type === "dust") continue;
@@ -483,6 +1515,436 @@
     ctx.beginPath(); ctx.ellipse(x - 10, y - 4 - wf, 5, 2, 0.3, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = "#E24B4A"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x - 2, y + 4); ctx.lineTo(x - 5, y + 9); ctx.moveTo(x + 1, y + 4); ctx.lineTo(x - 2, y + 9); ctx.stroke();
+  }
+
+  function drawViviana() {
+    if (!state.viviana) return;
+    var v = state.viviana;
+    var x = v.x, y = v.y;
+    var bob = Math.sin(v.phase) * 3;
+    var wingFlap = Math.sin(v.phase * 3) * 4;
+
+    // 光环 (هاله‌ی پشتش)
+    var haloGrad = ctx.createRadialGradient(x, y - 5 + bob, 5, x, y - 5 + bob, 35);
+    haloGrad.addColorStop(0, "rgba(255, 192, 209, 0.5)");
+    haloGrad.addColorStop(1, "rgba(255, 192, 209, 0)");
+    ctx.fillStyle = haloGrad;
+    ctx.beginPath();
+    ctx.arc(x, y - 5 + bob, 35, 0, Math.PI * 2);
+    ctx.fill();
+
+    // بال‌های پری (دو طرف، شفاف صورتی)
+    ctx.fillStyle = "rgba(247, 193, 213, 0.7)";
+    ctx.strokeStyle = "rgba(212, 83, 126, 0.9)";
+    ctx.lineWidth = 1;
+    // بال چپ بالا
+    ctx.beginPath();
+    ctx.ellipse(x - 10, y - 16 + bob, 8, 12, -0.3 + wingFlap * 0.05, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // بال راست بالا
+    ctx.beginPath();
+    ctx.ellipse(x + 10, y - 16 + bob, 8, 12, 0.3 - wingFlap * 0.05, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // بال چپ پایین (کوچک‌تر)
+    ctx.beginPath();
+    ctx.ellipse(x - 9, y - 5 + bob, 6, 8, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+    // بال راست پایین
+    ctx.beginPath();
+    ctx.ellipse(x + 9, y - 5 + bob, 6, 8, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // لباس صورتی پری
+    ctx.fillStyle = "#E84A5F";
+    ctx.beginPath();
+    ctx.moveTo(x - 6, y - 12 + bob);
+    ctx.lineTo(x - 9, y + 4 + bob);
+    ctx.lineTo(x + 9, y + 4 + bob);
+    ctx.lineTo(x + 6, y - 12 + bob);
+    ctx.closePath();
+    ctx.fill();
+    // لبه‌ی لباس
+    ctx.fillStyle = "#FFD966";
+    ctx.beginPath();
+    ctx.moveTo(x - 9, y + 4 + bob);
+    ctx.lineTo(x - 10, y + 7 + bob);
+    ctx.lineTo(x + 10, y + 7 + bob);
+    ctx.lineTo(x + 9, y + 4 + bob);
+    ctx.closePath();
+    ctx.fill();
+
+    // پاهای کوچک
+    ctx.fillStyle = "#F5C4B3";
+    ctx.fillRect(x - 4, y + 6 + bob, 3, 5);
+    ctx.fillRect(x + 1, y + 6 + bob, 3, 5);
+
+    // سر
+    ctx.fillStyle = "#F5C4B3";
+    ctx.beginPath();
+    ctx.arc(x, y - 18 + bob, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // موهای مشکی (با تار بلند)
+    ctx.fillStyle = "#1A1A1A";
+    // موی بالای سر
+    ctx.beginPath();
+    ctx.arc(x, y - 20 + bob, 7.5, Math.PI, 0);
+    ctx.fill();
+    // موهای بلند کنار صورت
+    ctx.beginPath();
+    ctx.moveTo(x - 7, y - 18 + bob);
+    ctx.quadraticCurveTo(x - 9, y - 8 + bob, x - 6, y - 2 + bob);
+    ctx.lineTo(x - 4, y - 2 + bob);
+    ctx.quadraticCurveTo(x - 5, y - 10 + bob, x - 5, y - 18 + bob);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + 7, y - 18 + bob);
+    ctx.quadraticCurveTo(x + 9, y - 8 + bob, x + 6, y - 2 + bob);
+    ctx.lineTo(x + 4, y - 2 + bob);
+    ctx.quadraticCurveTo(x + 5, y - 10 + bob, x + 5, y - 18 + bob);
+    ctx.closePath();
+    ctx.fill();
+    // تک‌مو بالا
+    ctx.fillRect(x - 1, y - 27 + bob, 2, 6);
+
+    // چشم‌ها
+    ctx.fillStyle = "#1A1A1A";
+    ctx.beginPath();
+    ctx.arc(x - 2.5, y - 18 + bob, 1.2, 0, Math.PI * 2);
+    ctx.arc(x + 2.5, y - 18 + bob, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // لبخند
+    ctx.strokeStyle = "#A32D2D";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x, y - 15 + bob, 1.5, 0, Math.PI);
+    ctx.stroke();
+
+    // گونه‌ها صورتی
+    ctx.fillStyle = "rgba(232, 75, 74, 0.4)";
+    ctx.beginPath();
+    ctx.arc(x - 4, y - 16 + bob, 1.5, 0, Math.PI * 2);
+    ctx.arc(x + 4, y - 16 + bob, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // چوب جادو در دست راست
+    var wandX = x + 12, wandY = y - 8 + bob;
+    var wandAngle = -0.6 + Math.sin(v.phase * 2) * 0.3;
+    ctx.save();
+    ctx.translate(wandX, wandY);
+    ctx.rotate(wandAngle);
+    // چوب
+    ctx.strokeStyle = "#5C3A21";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(12, -12);
+    ctx.stroke();
+    // ستاره‌ی نوک چوب
+    ctx.fillStyle = "#FFD966";
+    drawStar(13, -13, 5, 4, 2);
+    ctx.fillStyle = "#FFE066";
+    drawStar(13, -13, 5, 2.5, 1.2);
+    ctx.restore();
+
+    // ذرات جرقه دور چوب جادو
+    if (v.sparkleTimer % 8 === 0) {
+      state.particles.push({
+        x: x + 22 + Math.cos(wandAngle) * 8,
+        y: y - 18 + bob + Math.sin(wandAngle) * 8,
+        vx: (Math.random() - 0.5) * 2,
+        vy: -Math.random() * 2,
+        life: 25, maxLife: 25,
+        color: ["#FFD966", "#F4C0D1", "#FFFFFF"][Math.floor(Math.random() * 3)],
+        size: Math.random() * 2 + 1.5,
+        type: "spark"
+      });
+    }
+
+    // اسم VIVIANA بالای سرش - با badge جذاب
+    if (v.mode !== "retreat") {
+      ctx.font = "bold 13px Inter, sans-serif";
+      ctx.textAlign = "center";
+      var nameText = "✨ VIVIANA ✨";
+      var nameWidth = ctx.measureText(nameText).width;
+      var bgX = x - nameWidth/2 - 8, bgY = y - 48 + bob, bgW = nameWidth + 16, bgH = 18;
+      // پس‌زمینه‌ی pill صورتی
+      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+      rr(bgX, bgY, bgW, bgH, 9, true, false);
+      ctx.strokeStyle = "#D4537E";
+      ctx.lineWidth = 2;
+      rr(bgX, bgY, bgW, bgH, 9, false, true);
+      // متن
+      ctx.fillStyle = "#D4537E";
+      ctx.textBaseline = "middle";
+      ctx.fillText(nameText, x, bgY + bgH/2);
+      ctx.textBaseline = "alphabetic";
+    }
+
+    // رسم قلبی که Viviana حمل می‌کنه یا می‌فرسته
+    if (v.heart) {
+      // قلب شناور با چرخش
+      var hY = v.heart.displayY !== undefined ? v.heart.displayY : v.heart.y;
+      var hRot = v.heart.rotation || 0;
+      var hSize = 12 * v.heart.scale;
+      if (v.heart.dropped) hSize = 14;  // وقتی پرتاب شد، اندازه‌ی نهایی
+      drawHeart(v.heart.x, hY, hSize, hRot);
+    }
+  }
+
+  function drawHeart(cx, cy, size, rotation) {
+    if (size < 0.5) return;
+    rotation = rotation || 0;
+    // هاله‌ی صورتی دور قلب
+    var heartGrad = ctx.createRadialGradient(cx, cy, 1, cx, cy, size * 2.5);
+    heartGrad.addColorStop(0, "rgba(255, 107, 157, 0.6)");
+    heartGrad.addColorStop(1, "rgba(255, 107, 157, 0)");
+    ctx.fillStyle = heartGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, size * 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    // قلب چرخان
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rotation);
+    ctx.fillStyle = "#E84A5F";
+    ctx.beginPath();
+    ctx.moveTo(0, size * 0.5);
+    ctx.bezierCurveTo(0, size * 0.2, -size, 0, -size, -size * 0.3);
+    ctx.bezierCurveTo(-size, -size, -size * 0.3, -size * 1.1, 0, -size * 0.4);
+    ctx.bezierCurveTo(size * 0.3, -size * 1.1, size, -size, size, -size * 0.3);
+    ctx.bezierCurveTo(size, 0, 0, size * 0.2, 0, size * 0.5);
+    ctx.closePath();
+    ctx.fill();
+    // برق سفید
+    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+    ctx.beginPath();
+    ctx.ellipse(-size * 0.3, -size * 0.4, size * 0.2, size * 0.3, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawStar(cx, cy, spikes, outerR, innerR) {
+    var rot = Math.PI / 2 * 3;
+    var x = cx, y = cy;
+    var step = Math.PI / spikes;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerR);
+    for (var i = 0; i < spikes; i++) {
+      x = cx + Math.cos(rot) * outerR;
+      y = cy + Math.sin(rot) * outerR;
+      ctx.lineTo(x, y);
+      rot += step;
+      x = cx + Math.cos(rot) * innerR;
+      y = cy + Math.sin(rot) * innerR;
+      ctx.lineTo(x, y);
+      rot += step;
+    }
+    ctx.lineTo(cx, cy - outerR);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawAlireza() {
+    if (!state.alireza) return;
+    var a = state.alireza;
+    var x = a.x, y = a.y;
+    var bob = Math.sin(a.phase) * 2;
+
+    // 红色光环 شرور (هاله‌ی قرمز تیره)
+    var auraGrad = ctx.createRadialGradient(x, y - 5 + bob, 5, x, y - 5 + bob, 30);
+    auraGrad.addColorStop(0, "rgba(163, 45, 45, 0.4)");
+    auraGrad.addColorStop(1, "rgba(163, 45, 45, 0)");
+    ctx.fillStyle = auraGrad;
+    ctx.beginPath();
+    ctx.arc(x, y - 5 + bob, 30, 0, Math.PI * 2);
+    ctx.fill();
+
+    // بال‌های دوزخی (دو طرف، رنگ تیره مایل به قرمز)
+    ctx.fillStyle = "rgba(60, 30, 30, 0.85)";
+    ctx.strokeStyle = "#5C0E0E";
+    ctx.lineWidth = 1;
+    var wingFlap = Math.sin(a.phase * 3) * 4;
+    // بال چپ خفاشی
+    ctx.beginPath();
+    ctx.moveTo(x - 4, y - 12 + bob);
+    ctx.lineTo(x - 14, y - 18 + bob + wingFlap);
+    ctx.lineTo(x - 16, y - 10 + bob);
+    ctx.lineTo(x - 12, y - 6 + bob);
+    ctx.lineTo(x - 14, y - 2 + bob);
+    ctx.lineTo(x - 6, y - 4 + bob);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // بال راست خفاشی
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y - 12 + bob);
+    ctx.lineTo(x + 14, y - 18 + bob - wingFlap);
+    ctx.lineTo(x + 16, y - 10 + bob);
+    ctx.lineTo(x + 12, y - 6 + bob);
+    ctx.lineTo(x + 14, y - 2 + bob);
+    ctx.lineTo(x + 6, y - 4 + bob);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // لباس مشکی-قرمز
+    ctx.fillStyle = "#3D0E0E";
+    ctx.beginPath();
+    ctx.moveTo(x - 6, y - 10 + bob);
+    ctx.lineTo(x - 8, y + 6 + bob);
+    ctx.lineTo(x + 8, y + 6 + bob);
+    ctx.lineTo(x + 6, y - 10 + bob);
+    ctx.closePath();
+    ctx.fill();
+    // لبه‌ی نارنجی-قرمز لباس (مثل آتش)
+    ctx.fillStyle = "#D85A30";
+    ctx.beginPath();
+    ctx.moveTo(x - 8, y + 6 + bob);
+    ctx.lineTo(x - 8, y + 8 + bob);
+    ctx.lineTo(x - 6, y + 6 + bob);
+    ctx.lineTo(x - 4, y + 8 + bob);
+    ctx.lineTo(x - 2, y + 6 + bob);
+    ctx.lineTo(x, y + 8 + bob);
+    ctx.lineTo(x + 2, y + 6 + bob);
+    ctx.lineTo(x + 4, y + 8 + bob);
+    ctx.lineTo(x + 6, y + 6 + bob);
+    ctx.lineTo(x + 8, y + 8 + bob);
+    ctx.lineTo(x + 8, y + 6 + bob);
+    ctx.closePath();
+    ctx.fill();
+
+    // پاهای کوچک
+    ctx.fillStyle = "#1A1A1A";
+    ctx.fillRect(x - 4, y + 6 + bob, 3, 4);
+    ctx.fillRect(x + 1, y + 6 + bob, 3, 4);
+
+    // سر
+    ctx.fillStyle = "#E8B59E";
+    ctx.beginPath();
+    ctx.arc(x, y - 18 + bob, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // موهای مشکی نامرتب
+    ctx.fillStyle = "#0A0A0A";
+    ctx.beginPath();
+    ctx.arc(x, y - 20 + bob, 7.5, Math.PI, 0);
+    ctx.fill();
+    // تار موی شیطنت‌آمیز (سیخ سیخ)
+    ctx.beginPath();
+    ctx.moveTo(x - 5, y - 24 + bob);
+    ctx.lineTo(x - 3, y - 28 + bob);
+    ctx.lineTo(x - 1, y - 24 + bob);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + 1, y - 25 + bob);
+    ctx.lineTo(x + 3, y - 30 + bob);
+    ctx.lineTo(x + 5, y - 25 + bob);
+    ctx.closePath();
+    ctx.fill();
+
+    // 😈 شاخ‌های شیطانی کوچک
+    ctx.fillStyle = "#A32D2D";
+    ctx.beginPath();
+    ctx.moveTo(x - 6, y - 23 + bob);
+    ctx.lineTo(x - 4, y - 28 + bob);
+    ctx.lineTo(x - 3, y - 23 + bob);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + 3, y - 23 + bob);
+    ctx.lineTo(x + 4, y - 28 + bob);
+    ctx.lineTo(x + 6, y - 23 + bob);
+    ctx.closePath();
+    ctx.fill();
+
+    // چشم‌های قرمز شیطانی
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath();
+    ctx.arc(x - 2.5, y - 18 + bob, 1.8, 0, Math.PI * 2);
+    ctx.arc(x + 2.5, y - 18 + bob, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#A32D2D";
+    ctx.beginPath();
+    ctx.arc(x - 2.5, y - 18 + bob, 1, 0, Math.PI * 2);
+    ctx.arc(x + 2.5, y - 18 + bob, 1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ابروهای شیطانی (کج)
+    ctx.strokeStyle = "#0A0A0A"; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x - 5, y - 22 + bob);
+    ctx.lineTo(x - 1, y - 21 + bob);
+    ctx.moveTo(x + 1, y - 21 + bob);
+    ctx.lineTo(x + 5, y - 22 + bob);
+    ctx.stroke();
+
+    // لبخند شیطانی (پوزخند)
+    ctx.strokeStyle = "#5C0E0E"; ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(x - 3, y - 14 + bob);
+    ctx.quadraticCurveTo(x, y - 11 + bob, x + 3, y - 14 + bob);
+    ctx.stroke();
+    // یه دندون کوچک
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(x - 1, y - 13 + bob, 1, 2);
+
+    // مانعی که توی دست داره (موقع تحویل)
+    if (a.evilItem && a.evilItem.scale > 0.1) {
+      var ei = a.evilItem;
+      var sc = ei.scale;
+      // پس‌زمینه‌ی سفید کوچک
+      var bw = 60 * sc, bh = 24 * sc;
+      ctx.fillStyle = "#FFFFFF";
+      rr(ei.x - bw/2, ei.y - bh/2, bw, bh, 4 * sc, true, false);
+      ctx.strokeStyle = ei.color; ctx.lineWidth = 2 * sc;
+      rr(ei.x - bw/2, ei.y - bh/2, bw, bh, 4 * sc, false, true);
+      // emoji و متن
+      ctx.fillStyle = "#2C2C2A";
+      ctx.font = "bold " + (10 * sc) + "px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(ei.emoji + " " + ei.label, ei.x, ei.y);
+    }
+
+    // اسم ALIREZA بالای سرش - با badge جذاب
+    if (a.mode !== "retreat") {
+      ctx.font = "bold 13px Inter, sans-serif";
+      ctx.textAlign = "center";
+      var aNameText = "😈 ALIREZA 😈";
+      var aNameWidth = ctx.measureText(aNameText).width;
+      var abgX = x - aNameWidth/2 - 8, abgY = y - 48 + bob, abgW = aNameWidth + 16, abgH = 18;
+      // پس‌زمینه‌ی pill قرمز تیره
+      ctx.fillStyle = "rgba(20, 20, 20, 0.92)";
+      rr(abgX, abgY, abgW, abgH, 9, true, false);
+      ctx.strokeStyle = "#FF4444";
+      ctx.lineWidth = 2;
+      rr(abgX, abgY, abgW, abgH, 9, false, true);
+      // متن
+      ctx.fillStyle = "#FFD966";
+      ctx.textBaseline = "middle";
+      ctx.fillText(aNameText, x, abgY + abgH/2);
+      ctx.textBaseline = "alphabetic";
+    }
+
+    // ذرات دود سیاه پشت سرش
+    if (a.sparkleTimer % 5 === 0) {
+      state.particles.push({
+        x: x + (Math.random() - 0.5) * 10,
+        y: y + 10 + bob,
+        vx: (Math.random() - 0.5) * 1,
+        vy: -Math.random() * 1 + 0.5,
+        life: 25, maxLife: 25,
+        color: ["#3D0E0E", "#5C0E0E", "#1A1A1A"][Math.floor(Math.random() * 3)],
+        size: Math.random() * 3 + 2,
+        type: "smoke"
+      });
+    }
   }
 
   function cathedral(P) {
@@ -600,32 +2062,169 @@
     ctx.beginPath(); ctx.ellipse(x + 13, GROUND_Y + 2, 16, 3, 0, 0, Math.PI * 2); ctx.fill();
 
     if (dk) {
-      ctx.fillStyle = "#3C3489"; rr(x - 5, y - 24, 13, 18, 3, true, false);
-      ctx.fillStyle = "#185FA5"; rr(x + 4, y - 24, 26, 20, 4, true, false);
-      ctx.fillStyle = "#F5C4B3"; ctx.beginPath(); ctx.arc(x + 30, y - 17, 9, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#2C2C2A"; ctx.beginPath(); ctx.arc(x + 30, y - 19, 9, Math.PI * 1.1, Math.PI * 1.9); ctx.fill();
+      // ردای مشکی در حالت خم
+      ctx.fillStyle = "#1A1A1A";
+      rr(x - 2, y - 24, 32, 22, 4, true, false);
+      // شال قرمز روی شانه (در حالت خم)
+      ctx.fillStyle = "#A32D2D";
+      ctx.fillRect(x + 4, y - 24, 4, 20);
+      ctx.fillRect(x + 22, y - 24, 4, 20);
+      // سر
+      ctx.fillStyle = "#F5C4B3";
+      ctx.beginPath(); ctx.arc(x + 30, y - 17, 9, 0, Math.PI * 2); ctx.fill();
+      // 🎓 کلاه فارغ‌التحصیلی در حالت خم
+      ctx.fillStyle = "#1A1A1A";
+      ctx.beginPath(); ctx.arc(x + 30, y - 21, 9.5, Math.PI, 0); ctx.fill();
+      // صفحه‌ی mortarboard
+      ctx.fillStyle = "#0A0A0A";
+      ctx.beginPath();
+      ctx.moveTo(x + 18, y - 24);
+      ctx.lineTo(x + 30, y - 28);
+      ctx.lineTo(x + 42, y - 24);
+      ctx.lineTo(x + 30, y - 20);
+      ctx.closePath();
+      ctx.fill();
+      // دکمه طلایی
+      ctx.fillStyle = "#FFD966";
+      ctx.beginPath(); ctx.arc(x + 30, y - 24, 1.5, 0, Math.PI * 2); ctx.fill();
+      // منگوله
+      ctx.strokeStyle = "#FFD966"; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x + 30, y - 24);
+      ctx.lineTo(x + 38, y - 17);
+      ctx.stroke();
+      ctx.fillStyle = "#FFD966";
+      ctx.beginPath(); ctx.arc(x + 38, y - 16, 2, 0, Math.PI * 2); ctx.fill();
+      // چشم
+      ctx.fillStyle = "#2C2C2A";
       ctx.fillRect(x + 35, y - 18, 2, 2);
-      ctx.fillStyle = "#0C447C"; ctx.fillRect(x + 6, y - 6, 9, 6); ctx.fillRect(x + 19, y - 6, 9, 6);
+      // پاها (شلوار مشکی)
+      ctx.fillStyle = "#1A1A1A"; ctx.fillRect(x + 6, y - 6, 9, 6); ctx.fillRect(x + 19, y - 6, 9, 6);
       ctx.fillStyle = "#FFFFFF"; ctx.fillRect(x + 4, y - 2, 12, 2); ctx.fillRect(x + 18, y - 2, 12, 2);
       return;
     }
 
-    ctx.fillStyle = "#3C3489"; rr(x - 3, y - 40 + bB, 14, 24, 3, true, false);
-    ctx.fillStyle = "#FFD966"; ctx.fillRect(x + 1, y - 32 + bB, 8, 3);
-    ctx.fillStyle = "#185FA5"; rr(x + 4, y - 38 + bB, 20, 24, 4, true, false);
+    // 🎓 ردای فارغ‌التحصیلی مشکی
+    // قسمت زیرین ردا (که از پایین فلر می‌خوره)
+    ctx.fillStyle = "#1A1A1A";
+    ctx.beginPath();
+    ctx.moveTo(x + 2, y - 38 + bB);
+    ctx.lineTo(x - 2, y - 8 + bB);
+    ctx.lineTo(x + 28, y - 8 + bB);
+    ctx.lineTo(x + 24, y - 38 + bB);
+    ctx.closePath();
+    ctx.fill();
+    // آستین‌های گشاد ردا (پشت بازوها)
+    ctx.fillStyle = "#0A0A0A";
+    ctx.beginPath();
+    ctx.moveTo(x + 22, y - 38 + bB);
+    ctx.lineTo(x + 30, y - 36 + bB);
+    ctx.lineTo(x + 30, y - 20 + bB);
+    ctx.lineTo(x + 22, y - 20 + bB);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y - 38 + bB);
+    ctx.lineTo(x - 4, y - 36 + bB);
+    ctx.lineTo(x - 4, y - 20 + bB);
+    ctx.lineTo(x + 4, y - 20 + bB);
+    ctx.closePath();
+    ctx.fill();
+    // پیراهن سفید زیر ردا (نمای V)
     ctx.fillStyle = "#FFFFFF";
     ctx.beginPath();
-    ctx.moveTo(x + 10, y - 38 + bB); ctx.lineTo(x + 14, y - 34 + bB); ctx.lineTo(x + 18, y - 38 + bB); ctx.closePath(); ctx.fill();
+    ctx.moveTo(x + 9, y - 38 + bB);
+    ctx.lineTo(x + 14, y - 28 + bB);
+    ctx.lineTo(x + 19, y - 38 + bB);
+    ctx.closePath();
+    ctx.fill();
+    // کراوات کوچک (اختیاری، رنگ CFTN آبی)
+    ctx.fillStyle = "#185FA5";
+    ctx.beginPath();
+    ctx.moveTo(x + 12, y - 33 + bB);
+    ctx.lineTo(x + 16, y - 33 + bB);
+    ctx.lineTo(x + 15, y - 24 + bB);
+    ctx.lineTo(x + 13, y - 24 + bB);
+    ctx.closePath();
+    ctx.fill();
+    // 🎀 شال (stole) رنگی روی شانه‌ها — رنگ‌های Strasbourg/CFTN
+    // شال چپ
+    ctx.fillStyle = "#A32D2D";
+    ctx.beginPath();
+    ctx.moveTo(x + 6, y - 38 + bB);
+    ctx.lineTo(x + 10, y - 38 + bB);
+    ctx.lineTo(x + 13, y - 12 + bB);
+    ctx.lineTo(x + 9, y - 12 + bB);
+    ctx.closePath();
+    ctx.fill();
+    // شال راست
+    ctx.beginPath();
+    ctx.moveTo(x + 18, y - 38 + bB);
+    ctx.lineTo(x + 22, y - 38 + bB);
+    ctx.lineTo(x + 19, y - 12 + bB);
+    ctx.lineTo(x + 15, y - 12 + bB);
+    ctx.closePath();
+    ctx.fill();
+    // حاشیه طلایی شال‌ها
+    ctx.fillStyle = "#FFD966";
+    ctx.fillRect(x + 9, y - 14 + bB, 4, 2);
+    ctx.fillRect(x + 15, y - 14 + bB, 4, 2);
+    // بازوها (پوست)
     ctx.fillStyle = "#F5C4B3";
     ctx.fillRect(x + 22, y - 32 + aS + bB, 6, 14); ctx.fillRect(x - 2, y - 32 - aS + bB, 6, 14);
-    ctx.fillStyle = "#185FA5";
-    ctx.fillRect(x + 22, y - 36 + bB, 6, 6); ctx.fillRect(x - 2, y - 36 + bB, 6, 6);
+    // مچ آستین‌های ردا (cuff)
+    ctx.fillStyle = "#1A1A1A";
+    ctx.fillRect(x + 22, y - 22 + aS + bB, 6, 3);
+    ctx.fillRect(x - 2, y - 22 - aS + bB, 6, 3);
+    // گردن
     ctx.fillStyle = "#E8B59E"; ctx.fillRect(x + 11, y - 40 + bB, 6, 4);
+    // سر
     ctx.fillStyle = "#F5C4B3";
     ctx.beginPath(); ctx.arc(x + 14, y - 47 + bB, 10, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#2C2C2A";
-    ctx.beginPath(); ctx.arc(x + 14, y - 50 + bB, 10, Math.PI, 0); ctx.fill();
-    ctx.fillRect(x + 13, y - 60 + bB + Math.sin(p.hairWave) * 1, 3, 8);
+    // 🎓 کلاه فارغ‌التحصیلی (mortarboard)
+    // پایه‌ی کلاه (نوار مشکی روی سر)
+    ctx.fillStyle = "#1A1A1A";
+    ctx.beginPath();
+    ctx.arc(x + 14, y - 52 + bB, 9.5, Math.PI, 0);
+    ctx.fill();
+    ctx.fillRect(x + 4.5, y - 52 + bB, 19, 4);
+    // صفحه‌ی مربعی بالای کلاه (mortarboard top)
+    ctx.fillStyle = "#0A0A0A";
+    ctx.beginPath();
+    ctx.moveTo(x - 2, y - 55 + bB);
+    ctx.lineTo(x + 14, y - 60 + bB);
+    ctx.lineTo(x + 30, y - 55 + bB);
+    ctx.lineTo(x + 14, y - 50 + bB);
+    ctx.closePath();
+    ctx.fill();
+    // برجستگی روشن روی صفحه برای حالت سه‌بعدی
+    ctx.fillStyle = "#2A2A2A";
+    ctx.beginPath();
+    ctx.moveTo(x + 14, y - 60 + bB);
+    ctx.lineTo(x + 30, y - 55 + bB);
+    ctx.lineTo(x + 22, y - 53 + bB);
+    ctx.lineTo(x + 14, y - 56 + bB);
+    ctx.closePath();
+    ctx.fill();
+    // دکمه‌ی وسط کلاه
+    ctx.fillStyle = "#FFD966";
+    ctx.beginPath();
+    ctx.arc(x + 14, y - 55 + bB, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+    // منگوله‌ی فارغ‌التحصیلی (با حرکت)
+    var tasselSwing = Math.sin(p.hairWave) * 2;
+    ctx.strokeStyle = "#FFD966";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x + 14, y - 55 + bB);
+    ctx.lineTo(x + 22 + tasselSwing, y - 48 + bB);
+    ctx.stroke();
+    // نوک منگوله
+    ctx.fillStyle = "#FFD966";
+    ctx.beginPath();
+    ctx.arc(x + 22 + tasselSwing, y - 47 + bB, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(x + 21 + tasselSwing, y - 46 + bB, 2.5, 4);
     ctx.fillStyle = "#FFFFFF";
     ctx.beginPath();
     ctx.arc(x + 10, y - 48 + bB, 2.5, 0, Math.PI * 2);
@@ -652,8 +2251,8 @@
     else if (p.emotion === "scared") ctx.arc(x + 14, y - 41 + bB, 2, 0, Math.PI * 2);
     else { ctx.moveTo(x + 12, y - 42 + bB); ctx.lineTo(x + 16, y - 42 + bB); }
     ctx.stroke();
-    ctx.fillStyle = "#5C3A21"; ctx.fillRect(x + 4, y - 14 + bB, 20, 3);
-    ctx.fillStyle = "#0C447C";
+    // پاها (شلوار مشکی زیر ردا)
+    ctx.fillStyle = "#1A1A1A";
     if (p.onGround) {
       var l1 = 12 + lS, l2 = 12 - lS;
       ctx.fillRect(x + 5, y - 11 + bB, 7, l1); ctx.fillRect(x + 15, y - 11 + bB, 7, l2);
@@ -667,36 +2266,139 @@
     }
   }
 
+  // 🎯 Cache آیتم‌ها: هر آیتم یک بار روی off-screen canvas کشیده می‌شه
+  // بعد فقط با drawImage کپی می‌شه → سریع و کاملاً تیز هنگام حرکت
+  // itemCache بالاتر تعریف شده
+
+  // Effective scale: ضریب نسبت native canvas به CSS coordinate
+  // این مقدار رو بعد از setup در دسترسه
+  var effectiveScale = window.devicePixelRatio || 1;
+
+  function buildItemSprite(it) {
+    var w = Math.round(it.w), h = Math.round(it.h);
+    var pad = 10;
+    var spriteW = w + pad * 2;
+    var spriteH = h + pad * 2;
+    // ⚡ از effectiveScale واقعی استفاده کن (نه فقط dpr)
+    // این ضریب بعد از setupCanvasHiDPI آپدیت می‌شه
+    var scale = Math.max(2, effectiveScale * 2);  // حداقل ۲ برابر برای تیزی
+
+    var off = document.createElement("canvas");
+    off.width = Math.round(spriteW * scale);
+    off.height = Math.round(spriteH * scale);
+    var octx = off.getContext("2d");
+    octx.scale(scale, scale);
+    octx.imageSmoothingEnabled = true;
+    octx.imageSmoothingQuality = "high";
+
+    var x = pad, y = pad + h;
+
+    // halo برای bonus
+    if (it.type === "bonus") {
+      octx.strokeStyle = it.color;
+      octx.globalAlpha = 0.3;
+      octx.lineWidth = 2;
+      rrPath(octx, x - 6, y - h - 6, w + 12, h + 12, 14);
+      octx.stroke();
+      octx.globalAlpha = 1;
+    }
+    // پس‌زمینه سفید
+    octx.fillStyle = "#FFFFFF";
+    rrPath(octx, x, y - h, w, h, 8);
+    octx.fill();
+    // نوار رنگی بالا
+    octx.fillStyle = it.color;
+    rrTopPath(octx, x, y - h, w, 10, 8);
+    octx.fill();
+    // حاشیه
+    octx.strokeStyle = it.color;
+    octx.lineWidth = 3;
+    rrPath(octx, x, y - h, w, h, 8);
+    octx.stroke();
+
+    var centerY = y - Math.round(h / 2);
+    // emoji بزرگ
+    octx.fillStyle = "#1A1A1A";
+    octx.font = "26px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+    octx.textAlign = "left";
+    octx.textBaseline = "alphabetic";
+    octx.fillText(it.emoji, x + 12, centerY + 9);
+    // label بزرگ
+    octx.font = "800 18px 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    var ty = centerY + 6;
+    octx.strokeStyle = "#FFFFFF";
+    octx.lineWidth = 5;
+    octx.lineJoin = "round";
+    octx.miterLimit = 2;
+    octx.strokeText(it.label, x + 46, ty);
+    octx.fillStyle = "#1A1A1A";
+    octx.fillText(it.label, x + 46, ty);
+
+    // خط زیر برای موانع پرنده
+    if (it.type === "obstacle" && it.flying) {
+      octx.strokeStyle = it.color;
+      octx.globalAlpha = 0.5;
+      octx.lineWidth = 2;
+      octx.setLineDash([6, 4]);
+      octx.beginPath();
+      octx.moveTo(x, y + 4);
+      octx.lineTo(x + w, y + 4);
+      octx.stroke();
+      octx.setLineDash([]);
+      octx.globalAlpha = 1;
+    }
+
+    return { canvas: off, w: spriteW, h: spriteH, pad: pad, scale: scale };
+  }
+
+  function getItemSprite(it) {
+    // کلید unique شامل label + type + flying
+    var key = it.type + "|" + it.label + "|" + it.flying;
+    if (!itemCache[key]) {
+      itemCache[key] = buildItemSprite(it);
+    }
+    return itemCache[key];
+  }
+
+  // path helper برای offscreen
+  function rrPath(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+  function rrTopPath(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.lineTo(x + w, y + h);
+    c.lineTo(x, y + h);
+    c.lineTo(x, y + r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+
   function drawItem(it) {
-    var isB = it.type === "bonus";
-    var x = it.x, y = it.y + (it.flying ? Math.sin(it.pulse + it.bobOffset) * 3 : 0);
-    var w = it.w, h = it.h;
+    var x = Math.round(it.x), y = Math.round(it.y);
+    var w = Math.round(it.w), h = Math.round(it.h);
+
+    // سایه روی زمین (نه روی sprite، چون فاصله‌ش از آیتم متفاوته)
     if (!it.flying) {
       ctx.fillStyle = "rgba(0,0,0,0.18)";
-      ctx.beginPath(); ctx.ellipse(x + w/2, GROUND_Y + 3, w/2.2, 3.5, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(x + w/2, GROUND_Y + 3, w/2.2, 3.5, 0, 0, Math.PI*2);
+      ctx.fill();
     }
-    if (isB) {
-      var ps = Math.sin(it.pulse) * 4 + 6;
-      ctx.strokeStyle = it.color;
-      ctx.globalAlpha = 0.25 + Math.sin(it.pulse) * 0.15;
-      ctx.lineWidth = 2;
-      rr(x - ps, y - h - ps, w + ps * 2, h + ps * 2, 14, false, true);
-      ctx.globalAlpha = 1;
-    }
-    ctx.fillStyle = "#FFFFFF"; rr(x, y - h, w, h, 8, true, false);
-    ctx.fillStyle = it.color; rrTop(x, y - h, w, 8, 8);
-    ctx.strokeStyle = it.color; ctx.lineWidth = 3; rr(x, y - h, w, h, 8, false, true);
-    ctx.fillStyle = "#2C2C2A";
-    ctx.font = "18px sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    ctx.fillText(it.emoji, x + 8, y - h/2 + 5);
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillText(it.label, x + 34, y - h/2 + 5);
-    if (!isB && it.flying) {
-      ctx.strokeStyle = it.color; ctx.globalAlpha = 0.5; ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
-      ctx.beginPath(); ctx.moveTo(x, y + 4); ctx.lineTo(x + w, y + 4); ctx.stroke();
-      ctx.setLineDash([]); ctx.globalAlpha = 1;
-    }
+
+    // ✨ کپی sprite ذخیره شده → بدون subpixel blur، سریع و تیز
+    var sp = getItemSprite(it);
+    var drawX = x - sp.pad;
+    var drawY = y - h - sp.pad;
+    // drawImage با ابعاد CSS (نه با dpr ضرب‌شده)
+    ctx.drawImage(sp.canvas, 0, 0, sp.canvas.width, sp.canvas.height, drawX, drawY, sp.w, sp.h);
   }
 
   function rr(x, y, w, h, r, fill, stroke) {
@@ -721,9 +2423,9 @@
   }
 
   function hud() {
-    document.getElementById("cs1").textContent = Math.floor(state.score);
-    document.getElementById("cs2").textContent = state.concepts;
-    document.getElementById("cs3").textContent = state.lives > 0 ? "♥".repeat(state.lives) : "—";
+    var e1 = document.getElementById("cs1"); if (e1) e1.textContent = Math.floor(state.score);
+    var e2 = document.getElementById("cs2"); if (e2) e2.textContent = state.concepts;
+    var e3 = document.getElementById("cs3"); if (e3) e3.textContent = state.lives > 0 ? "♥".repeat(state.lives) : "—";
   }
 
   // EVENT LISTENERS
@@ -755,8 +2457,164 @@
     });
   };
 
-  // AUTOSTART
-  reset();
+  // دکمه‌ی بزرگ Rejouer
+  document.getElementById("restartBigBtn").onclick = function() {
+    reset();
+  };
+
+  // دکمه‌ی Rejouer روی overlay canvas
+  document.getElementById("gameOverRestartBtn").onclick = function() {
+    reset();
+  };
+
+  // دکمه‌ی تغییر بازیکن
+  document.getElementById("changeNameBtn").onclick = function() {
+    if (raf) cancelAnimationFrame(raf);
+    state = null;
+    document.getElementById("gameScreen").style.display = "none";
+    document.getElementById("nameScreen").style.display = "block";
+    document.getElementById("share").style.display = "none";
+    document.getElementById("leaderboard").style.display = "none";
+    document.getElementById("nameInput").value = "";
+    showTopScoresPreview();
+    setTimeout(function() { document.getElementById("nameInput").focus(); }, 100);
+  };
+
+  // ====================== LEADERBOARD ======================
+  var LB_KEY = "cftn_runner_leaderboard_v1";
+  var playerName = "";
+
+  function loadLeaderboard() {
+    try {
+      var raw = localStorage.getItem(LB_KEY);
+      if (!raw) return [];
+      var arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [];
+      return arr;
+    } catch (e) { return []; }
+  }
+
+  function saveLeaderboard(arr) {
+    try { localStorage.setItem(LB_KEY, JSON.stringify(arr)); } catch (e) {}
+  }
+
+  function addScore(name, score, concepts) {
+    var arr = loadLeaderboard();
+    // پیدا کردن رکورد قبلی این بازیکن
+    var existingIdx = -1;
+    var nameLower = name.toLowerCase().trim();
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].name && arr[i].name.toLowerCase().trim() === nameLower) {
+        existingIdx = i; break;
+      }
+    }
+    if (existingIdx >= 0) {
+      // اگه امتیاز جدید بهتر بود، آپدیت کن. در غیر این صورت کاری نکن
+      if (score > arr[existingIdx].score) {
+        arr[existingIdx] = { name: name, score: score, concepts: concepts, date: new Date().toISOString().slice(0, 10), isNew: true };
+      } else {
+        arr[existingIdx].isNew = false;
+      }
+    } else {
+      arr.push({ name: name, score: score, concepts: concepts, date: new Date().toISOString().slice(0, 10), isNew: true });
+    }
+    arr.sort(function(a, b) { return b.score - a.score; });
+    arr = arr.slice(0, 50);
+    // پاک کردن isNew از همه‌ی غیر-جاری‌ها
+    saveLeaderboard(arr);
+    return arr;
+  }
+
+  function renderLeaderboard(container, highlightName) {
+    var arr = loadLeaderboard().slice(0, 10);
+    if (arr.length === 0) {
+      container.innerHTML = "<div style='text-align: center; color: #888; font-size: 13px;'>Aucun score enregistré pour le moment.<br>Soyez le premier !</div>";
+      return;
+    }
+    var html = "<div style='display: grid; gap: 6px;'>";
+    var medals = ["🥇", "🥈", "🥉"];
+    for (var i = 0; i < arr.length; i++) {
+      var e = arr[i];
+      var rank = i < 3 ? medals[i] : (i + 1) + ".";
+      var isHL = highlightName && e.name === highlightName;
+      var bg = isHL ? "#FFF3D6" : (i % 2 === 0 ? "#F8F8F2" : "#FFFFFF");
+      var border = isHL ? "2px solid #FFC857" : "1px solid #EEE";
+      html += "<div style='display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; padding: 8px 12px; background: " + bg + "; border-radius: 6px; border: " + border + "; align-items: center;'>" +
+        "<div style='font-size: 16px; font-weight: 700; text-align: center;'>" + rank + "</div>" +
+        "<div style='font-weight: 600; color: #185FA5;'>" + escapeHtml(e.name) + "</div>" +
+        "<div style='font-weight: 700; color: #1D9E75;'>" + e.score + " pts</div>" +
+        "</div>";
+    }
+    html += "</div>";
+    container.innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // نمایش top scores توی صفحه‌ی اسم
+  function showTopScoresPreview() {
+    var container = document.getElementById("topScoresPreview");
+    var arr = loadLeaderboard().slice(0, 5);
+    if (arr.length === 0) {
+      container.innerHTML = "";
+      return;
+    }
+    var html = "<div style='font-size: 13px; font-weight: 600; color: #185FA5; margin-bottom: 8px;'>🏆 Top 5 actuels</div><div style='display: grid; gap: 4px; font-size: 12px;'>";
+    for (var i = 0; i < arr.length; i++) {
+      var e = arr[i];
+      html += "<div style='display: flex; justify-content: space-between; padding: 3px 8px;'>" +
+        "<span><b>" + (i + 1) + ".</b> " + escapeHtml(e.name) + "</span>" +
+        "<span style='color: #1D9E75; font-weight: 600;'>" + e.score + " pts</span>" +
+        "</div>";
+    }
+    html += "</div>";
+    container.innerHTML = html;
+  }
+
+  // ====================== NAME SCREEN ======================
+  function startGame() {
+    var input = document.getElementById("nameInput");
+    var name = (input.value || "").trim();
+    if (!name) {
+      input.style.borderColor = "#E24B4A";
+      input.placeholder = "S'il vous plaît, entrez un prénom !";
+      input.focus();
+      setTimeout(function() {
+        input.style.borderColor = "#185FA5";
+        input.placeholder = "Votre prénom…";
+      }, 2000);
+      return;
+    }
+    if (name.length > 20) name = name.slice(0, 20);
+    playerName = name;
+    document.getElementById("csPlayerName").textContent = name;
+    document.getElementById("nameScreen").style.display = "none";
+    document.getElementById("gameScreen").style.display = "block";
+    // ⚡ بعد از نمایش، یه frame صبر کن تا layout انجام بشه، بعد setup
+    requestAnimationFrame(function() {
+      setupCanvasHiDPI();
+      requestAnimationFrame(function() {
+        // یه setup دوم برای اطمینان (بعضی browser ها)
+        setupCanvasHiDPI();
+        reset();
+      });
+    });
+  }
+
+  document.getElementById("startBtn").onclick = startGame;
+  document.getElementById("nameInput").addEventListener("keydown", function(e) {
+    if (e.code === "Enter") { e.preventDefault(); startGame(); }
+  });
+
+  // پر کردن preview top scores روی صفحه‌ی اسم
+  showTopScoresPreview();
+  // فوکوس روی فیلد اسم
+  setTimeout(function() { document.getElementById("nameInput").focus(); }, 100);
+
 })();
 </script>
 </body>
