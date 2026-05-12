@@ -788,8 +788,7 @@
     // اندازه‌ی native canvas با pixel ratio
     canvas.width = Math.round(displayW * dpr);
     canvas.height = Math.round(displayH * dpr);
-    canvas.style.width = displayW + "px";
-    canvas.style.height = displayH + "px";
+    // ⚠️ canvas.style.width/height رو ست نکن - بذار CSS با aspect-ratio خودش هندل کنه
     // scale طوری که coordinate system همون W, H بمونه
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     var scaleX = (displayW * dpr) / W;
@@ -986,9 +985,15 @@
     document.getElementById("shareText").textContent = "🏃 " + playerName + " a relevé le défi #CFTNRunner !\n\nScore : " + fs + " points\nConcepts attrapés : " + state.concepts + "\nNiveau : " + rank + (myRank > 0 && myRank <= 10 ? "\nClassement : #" + myRank + " du Top 10" : "") + "\n\nÀ votre tour de jouer ! 🥨\n👉 https://mralireza66.github.io/CFTN/\n\nUn petit jeu pour découvrir le Master CFTN de l'Université de Strasbourg.\n\n#MasterCFTN #IngénieriePédagogique #Unistra #Strasbourg #INSPE #LearningDesign";
     document.getElementById("share").style.display = "block";
 
-    // نمایش leaderboard
+    // نمایش leaderboard (با scores کش‌شده فوراً)
     document.getElementById("leaderboard").style.display = "block";
     renderLeaderboard(document.getElementById("leaderboardList"), playerName);
+    // 🌐 بعد از ۱.۵ ثانیه دوباره fetch کن تا score های دیگه‌ی همزمان رو بگیریم
+    setTimeout(function() {
+      fetchGlobalScores(function() {
+        renderLeaderboard(document.getElementById("leaderboardList"), playerName);
+      });
+    }, 1500);
 
     var hb = document.getElementById("hintBadge"); if (hb) hb.style.opacity = "0";
   }
@@ -2513,11 +2518,74 @@
     setTimeout(function() { document.getElementById("nameInput").focus(); }, 100);
   };
 
-  // ====================== LEADERBOARD ======================
+  // ====================== LEADERBOARD (JSONBin.io - global sync) ======================
   var LB_KEY = "cftn_runner_leaderboard_v1";
   var playerName = "";
 
-  function loadLeaderboard() {
+  // 🌐 تنظیمات JSONBin برای leaderboard جهانی
+  var JSONBIN_CONFIG = {
+    binId: "6a033e29adc21f119a8c8d7c",
+    apiKey: "$2a$10$MyR6MdgbxhMotdLkDTQHCeWyZfPU2pc5.PwQ2UH8pyEXyvKFaNVxa",
+    baseUrl: "https://api.jsonbin.io/v3/b/"
+  };
+
+  // cache محلی برای سرعت
+  var globalScoresCache = [];
+  var lastFetchTime = 0;
+
+  // 📥 دانلود امتیازات از JSONBin
+  function fetchGlobalScores(callback) {
+    var url = JSONBIN_CONFIG.baseUrl + JSONBIN_CONFIG.binId + "/latest";
+    fetch(url, {
+      method: "GET",
+      headers: {
+        "X-Master-Key": JSONBIN_CONFIG.apiKey,
+        "X-Bin-Meta": "false"
+      }
+    })
+    .then(function(r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      var scores = (data && Array.isArray(data.scores)) ? data.scores : [];
+      globalScoresCache = scores;
+      lastFetchTime = Date.now();
+      // sync با localStorage (به‌عنوان backup)
+      try { localStorage.setItem(LB_KEY, JSON.stringify(scores)); } catch (e) {}
+      if (callback) callback(scores);
+    })
+    .catch(function(err) {
+      console.warn("[Leaderboard] Échec de la récupération:", err);
+      // fallback به localStorage
+      var local = loadLocalLeaderboard();
+      globalScoresCache = local;
+      if (callback) callback(local);
+    });
+  }
+
+  // 📤 آپلود امتیازات به JSONBin
+  function pushGlobalScores(scores) {
+    var url = JSONBIN_CONFIG.baseUrl + JSONBIN_CONFIG.binId;
+    return fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": JSONBIN_CONFIG.apiKey
+      },
+      body: JSON.stringify({ scores: scores })
+    })
+    .then(function(r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .catch(function(err) {
+      console.warn("[Leaderboard] Échec de l'envoi:", err);
+    });
+  }
+
+  // localStorage backup
+  function loadLocalLeaderboard() {
     try {
       var raw = localStorage.getItem(LB_KEY);
       if (!raw) return [];
@@ -2527,12 +2595,19 @@
     } catch (e) { return []; }
   }
 
+  function loadLeaderboard() {
+    // اول cache، اگه خالیه از localStorage
+    if (globalScoresCache.length > 0) return globalScoresCache;
+    return loadLocalLeaderboard();
+  }
+
   function saveLeaderboard(arr) {
     try { localStorage.setItem(LB_KEY, JSON.stringify(arr)); } catch (e) {}
+    globalScoresCache = arr;
   }
 
   function addScore(name, score, concepts) {
-    var arr = loadLeaderboard();
+    var arr = loadLeaderboard().slice();  // copy
     // پیدا کردن رکورد قبلی این بازیکن
     var existingIdx = -1;
     var nameLower = name.toLowerCase().trim();
@@ -2542,7 +2617,6 @@
       }
     }
     if (existingIdx >= 0) {
-      // اگه امتیاز جدید بهتر بود، آپدیت کن. در غیر این صورت کاری نکن
       if (score > arr[existingIdx].score) {
         arr[existingIdx] = { name: name, score: score, concepts: concepts, date: new Date().toISOString().slice(0, 10), isNew: true };
       } else {
@@ -2553,8 +2627,9 @@
     }
     arr.sort(function(a, b) { return b.score - a.score; });
     arr = arr.slice(0, 50);
-    // پاک کردن isNew از همه‌ی غیر-جاری‌ها
     saveLeaderboard(arr);
+    // 🌐 sync به JSONBin (async، نتیجه رو منتظر نمی‌مونیم)
+    pushGlobalScores(arr);
     return arr;
   }
 
@@ -2643,8 +2718,12 @@
     if (e.code === "Enter") { e.preventDefault(); startGame(); }
   });
 
-  // پر کردن preview top scores روی صفحه‌ی اسم
+  // پر کردن preview top scores روی صفحه‌ی اسم (با scores کش‌شده فوراً)
   showTopScoresPreview();
+  // 🌐 دانلود scores جهانی از JSONBin و دوباره preview رو آپدیت کن
+  fetchGlobalScores(function() {
+    showTopScoresPreview();
+  });
   // فوکوس روی فیلد اسم
   setTimeout(function() { document.getElementById("nameInput").focus(); }, 100);
 
