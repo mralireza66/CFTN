@@ -2492,13 +2492,21 @@
   });
   document.addEventListener("keyup", function(e) { if (e.code === "ArrowDown") duck(false); });
 
-  document.getElementById("cs6").onclick = function() { jump(); };
+  // 🎯 دکمه‌ی Sauter - touchstart مستقیم برای واکنش سریع و امکان tap های پشت سر هم
+  var jumpBtn = document.getElementById("cs6");
+  jumpBtn.onclick = function(e) { e.preventDefault(); jump(); };
+  jumpBtn.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    jump();
+  }, { passive: false });
+
   var bD = document.getElementById("cs7");
   bD.onmousedown = function() { duck(true); };
   bD.onmouseup = function() { duck(false); };
   bD.onmouseleave = function() { duck(false); };
-  bD.ontouchstart = function(e) { e.preventDefault(); duck(true); };
-  bD.ontouchend = function(e) { e.preventDefault(); duck(false); };
+  bD.addEventListener("touchstart", function(e) { e.preventDefault(); e.stopPropagation(); duck(true); }, { passive: false });
+  bD.addEventListener("touchend", function(e) { e.preventDefault(); e.stopPropagation(); duck(false); }, { passive: false });
 
   // ⏸ Pause / Resume / Restart
   document.getElementById("csPause").onclick = function() {
@@ -2796,9 +2804,12 @@
   document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
   document.addEventListener('gestureend', function(e) { e.preventDefault(); });
 
-  // جلوگیری از double-tap zoom (iOS Safari)
+  // جلوگیری از double-tap zoom (iOS Safari) - فقط روی محتوای صفحه، نه دکمه‌های بازی
   var lastTouchEnd = 0;
   document.addEventListener('touchend', function(e) {
+    // دکمه‌های بازی استثنا هستن
+    var tag = e.target && e.target.id;
+    if (tag === "cs6" || tag === "cs7" || tag === "csPause" || tag === "cs5") return;
     var now = Date.now();
     if (now - lastTouchEnd <= 300) {
       e.preventDefault();
