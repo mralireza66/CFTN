@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>CFTN Runner · Strasbourg</title>
 <meta property="og:title" content="CFTN Runner · Strasbourg">
 <meta property="og:description" content="Un petit jeu pour découvrir le Master CFTN de l'Université de Strasbourg.">
@@ -11,6 +11,12 @@
   @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* جلوگیری از zoom روی double-tap توی موبایل */
+  html, body, button, canvas, .controls button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
   html, body { height: 100%; overflow-x: hidden; }
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -712,6 +718,15 @@
       <span id="hintLabel" style="font-size: 20px;"></span>
       <span id="hintAction" style="font-size: 13px; font-weight: 500; margin-left: 10px; opacity: 0.8;"></span>
     </div>
+    <!-- ⏸ Pause overlay -->
+    <div id="pauseOverlay" style="position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(135deg, rgba(24,95,165,0.85) 0%, rgba(212,83,126,0.85) 100%); border-radius: 18px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-align: center; padding: 20px; box-sizing: border-box; gap: 14px; z-index: 10;">
+      <div style="font-size: 56px; line-height: 1;">⏸</div>
+      <div style="font-family: 'Fredoka', sans-serif; font-size: 26px; font-weight: 700; color: white; text-shadow: 0 4px 16px rgba(0,0,0,0.4);">Pause</div>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 6px;">
+        <button id="resumeBtn" type="button" style="padding: 12px 24px; font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 600; background: linear-gradient(135deg, #1D9E75 0%, #2BB888 100%); color: white; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 6px 18px rgba(29,158,117,0.5);">▶ Reprendre</button>
+        <button id="restartFromPauseBtn" type="button" style="padding: 12px 24px; font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 600; background: rgba(255,255,255,0.95); color: #185FA5; border: 2px solid white; border-radius: 12px; cursor: pointer;">🔄 Recommencer</button>
+      </div>
+    </div>
     <!-- ⚰️ Game Over overlay - روی canvas نمایش داده می‌شه -->
     <div id="gameOverOverlay" style="position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(135deg, rgba(15,15,35,0.92) 0%, rgba(60,30,80,0.92) 100%); border-radius: 18px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); text-align: center; padding: 12px 16px; box-sizing: border-box; animation: fadeIn 0.5s ease; overflow-y: auto;">
       <div id="gameOverIcon" style="font-size: 56px; line-height: 1; margin-bottom: 8px; animation: bounce 1.5s ease-in-out infinite;">🎮</div>
@@ -735,15 +750,15 @@
     </div>
   </div>
 
+  <div class="controls">
+    <button id="cs6" type="button">↑ Sauter</button>
+    <button id="csPause" type="button">⏸ Pause</button>
+    <button id="cs7" type="button">↓ Se baisser</button>
+  </div>
+
   <div class="legend">
     <div class="bad"><strong>À éviter :</strong> procrastination, plagiat, burn-out, scroll infini, copier-IA…</div>
     <div class="good"><strong>À attraper :</strong> ingénierie pédagogique, scénarisation, PIC, mémoire, learning expedition…</div>
-  </div>
-
-  <div class="controls">
-    <button id="cs6" type="button">↑ Sauter</button>
-    <button id="cs7" type="button">↓ Se baisser</button>
-    <button id="cs8" type="button">🔄 Recommencer</button>
   </div>
 
   <!-- Leaderboard -->
@@ -937,6 +952,9 @@
     document.getElementById("share").style.display = "none";
     var lb = document.getElementById("leaderboard"); if (lb) lb.style.display = "none";
     var gov = document.getElementById("gameOverOverlay"); if (gov) gov.classList.remove("visible");
+    // ⏸ پنهان کردن pause overlay و برگرداندن متن دکمه
+    var pov = document.getElementById("pauseOverlay"); if (pov) pov.style.display = "none";
+    var pBtn = document.getElementById("csPause"); if (pBtn) pBtn.textContent = "⏸ Pause";
     // ⚡ بعد از پنهان شدن overlay، اندازه canvas رو دوباره چک کن
     setupCanvasHiDPI();
     lastTs = performance.now();
@@ -2470,6 +2488,7 @@
   document.addEventListener("keydown", function(e) {
     if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); jump(); }
     if (e.code === "ArrowDown") { e.preventDefault(); duck(true); }
+    if (e.code === "Escape" || e.code === "KeyP") { e.preventDefault(); togglePause(); }
   });
   document.addEventListener("keyup", function(e) { if (e.code === "ArrowDown") duck(false); });
 
@@ -2480,7 +2499,52 @@
   bD.onmouseleave = function() { duck(false); };
   bD.ontouchstart = function(e) { e.preventDefault(); duck(true); };
   bD.ontouchend = function(e) { e.preventDefault(); duck(false); };
-  document.getElementById("cs8").onclick = function() { reset(); };
+
+  // ⏸ Pause / Resume / Restart
+  document.getElementById("csPause").onclick = function() {
+    togglePause();
+  };
+
+  document.getElementById("resumeBtn").onclick = function() {
+    resumeGame();
+  };
+
+  document.getElementById("restartFromPauseBtn").onclick = function() {
+    // پنهان کردن pause overlay
+    document.getElementById("pauseOverlay").style.display = "none";
+    reset();
+  };
+
+  function togglePause() {
+    if (!state) return;
+    if (state.shownEnd) return;  // اگه بازی تموم شده، نمی‌تونه pause بشه
+    if (state.paused) {
+      resumeGame();
+    } else {
+      pauseGame();
+    }
+  }
+
+  function pauseGame() {
+    if (!state || state.shownEnd) return;
+    state.paused = true;
+    state.running = false;
+    if (raf) cancelAnimationFrame(raf);
+    document.getElementById("pauseOverlay").style.display = "flex";
+    document.getElementById("csPause").textContent = "▶ Reprendre";
+  }
+
+  function resumeGame() {
+    if (!state) return;
+    state.paused = false;
+    state.running = true;
+    document.getElementById("pauseOverlay").style.display = "none";
+    document.getElementById("csPause").textContent = "⏸ Pause";
+    lastTs = performance.now();
+    accumulator = 0;
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(loop);
+  }
 
   canvas.onclick = function() { if (state && state.running) jump(); };
   canvas.ontouchstart = function(e) { if (state && state.running) { e.preventDefault(); jump(); } };
@@ -2726,6 +2790,21 @@
   });
   // فوکوس روی فیلد اسم
   setTimeout(function() { document.getElementById("nameInput").focus(); }, 100);
+
+  // 📱 جلوگیری از zoom روی iOS (gesture handlers)
+  document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+  document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
+  document.addEventListener('gestureend', function(e) { e.preventDefault(); });
+
+  // جلوگیری از double-tap zoom (iOS Safari)
+  var lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e) {
+    var now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
 
 })();
 </script>
