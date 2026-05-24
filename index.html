@@ -280,6 +280,8 @@
   .char-viviana::before { background: linear-gradient(135deg, rgba(247, 193, 213, 0.35) 0%, rgba(255,240,245, 0.2) 100%); }
   .char-alireza { border-color: rgba(232, 160, 136, 0.6); }
   .char-alireza::before { background: linear-gradient(135deg, rgba(255, 200, 180, 0.35) 0%, rgba(255,232,224, 0.2) 100%); }
+  .char-sahra { border-color: rgba(155, 93, 229, 0.5); }
+  .char-sahra::before { background: linear-gradient(135deg, rgba(155, 93, 229, 0.25) 0%, rgba(180, 220, 255, 0.2) 100%); }
   .char-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 28px rgba(0,0,0,0.12);
@@ -309,6 +311,12 @@
       inset 0 0 0 3px rgba(232, 160, 136, 0.6);
     animation: floatChar 3.5s ease-in-out infinite reverse;
   }
+  .char-sahra .char-avatar {
+    box-shadow:
+      0 8px 24px rgba(155, 93, 229, 0.4),
+      inset 0 0 0 3px rgba(155, 93, 229, 0.4);
+    animation: floatChar 2.8s ease-in-out infinite;
+  }
   @keyframes floatChar {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-4px); }
@@ -323,6 +331,7 @@
   }
   .char-viviana-name { color: #C03A66; }
   .char-alireza-name { color: #8B1F1F; }
+  .char-sahra-name { color: #7A3DB5; }
   .char-desc {
     font-size: 13px;
     line-height: 1.5;
@@ -388,14 +397,34 @@
     letter-spacing: -0.3px;
   }
 
-  /* راهنما */
-  #help {
-    background: rgba(255,255,255,0.55);
-    color: #185FA5;
-    padding: 14px 18px;
+  /* 🎯 Mission box - بالای canvas */
+  #missionBox {
+    background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 100%);
+    color: #2C2820;
+    padding: 14px 20px;
     border-radius: 18px;
     margin-bottom: 12px;
-    font-size: 13px;
+    font-size: 13.5px;
+    font-weight: 500;
+    text-align: center;
+    box-shadow:
+      0 8px 24px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.6);
+    line-height: 1.5;
+  }
+  #missionBox strong { color: #185FA5; font-weight: 700; }
+
+  /* راهنمای کنترل‌ها - پایین صفحه */
+  #controlsHelp {
+    background: rgba(255,255,255,0.55);
+    color: #185FA5;
+    padding: 12px 18px;
+    border-radius: 16px;
+    margin-top: 14px;
+    font-size: 12.5px;
     font-weight: 600;
     text-align: center;
     box-shadow:
@@ -573,7 +602,7 @@
     h1 { font-size: 32px; }
     .stat-value { font-size: 18px; }
     .stat-label { font-size: 10px; }
-    #help { font-size: 12px; padding: 10px 14px; }
+    #missionBox, #controlsHelp { font-size: 12px; padding: 10px 14px; }
     .legend { font-size: 12px; }
     .controls button { font-size: 14px; }
     /* hint badge کوچک‌تر */
@@ -591,7 +620,7 @@
     .stat { padding: 8px 4px; }
     .stat-label { font-size: 9px; letter-spacing: 0.4px; }
     .stat-value { font-size: 16px; }
-    #help { font-size: 11px; padding: 9px 12px; }
+    #missionBox, #controlsHelp { font-size: 11.5px; padding: 9px 12px; }
     .controls button { padding: 14px 8px; font-size: 13px; }
     .characters-intro { gap: 12px; }
     .char-avatar { width: 64px; height: 64px; }
@@ -630,7 +659,7 @@
     .stat-value { font-size: 14px; }
     /* "Niveau" رو روی موبایل حذف کن چون فضا کمه */
     .stat:nth-child(4) { display: none; }
-    #help { font-size: 11px; padding: 10px 12px; border-radius: 12px; }
+    #missionBox, #controlsHelp { font-size: 11px; padding: 10px 12px; border-radius: 12px; }
     canvas { border-radius: 14px; border-width: 2px; max-width: 100%; }
     /* روی موبایل، اطمینان از اینکه canvas از container خارج نشه */
     .container { padding: 0; }
@@ -738,6 +767,56 @@
     <!-- معرفی کاراکترها -->
     <div class="char-intro-title">👥 Personnages spéciaux</div>
     <div class="characters-intro">
+      <!-- Sahra -->
+      <div class="char-card char-sahra">
+        <div class="char-avatar">
+          <svg viewBox="0 0 60 60" width="60" height="60">
+            <!-- هاله بنفش-آبی جادویی -->
+            <circle cx="30" cy="30" r="28" fill="url(#sahraGlow)" opacity="0.4"/>
+            <defs>
+              <radialGradient id="sahraGlow">
+                <stop offset="0%" stop-color="#9B5DE5"/>
+                <stop offset="100%" stop-color="#9B5DE5" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <!-- بال‌های آبی شفاف -->
+            <ellipse cx="14" cy="26" rx="9" ry="13" fill="#B4DCFF" opacity="0.7" stroke="#5DB8FF" stroke-width="0.8" transform="rotate(-15 14 26)"/>
+            <ellipse cx="46" cy="26" rx="9" ry="13" fill="#B4DCFF" opacity="0.7" stroke="#5DB8FF" stroke-width="0.8" transform="rotate(15 46 26)"/>
+            <!-- لباس بنفش -->
+            <path d="M 22 36 L 19 50 L 41 50 L 38 36 Z" fill="#9B5DE5"/>
+            <!-- نوار طلایی -->
+            <path d="M 19 50 L 18 53 L 42 53 L 41 50 Z" fill="#FFD966"/>
+            <!-- پاها -->
+            <rect x="25" y="50" width="3" height="6" fill="#F5C4B3"/>
+            <rect x="32" y="50" width="3" height="6" fill="#F5C4B3"/>
+            <!-- سر -->
+            <circle cx="30" cy="24" r="8" fill="#F5C4B3"/>
+            <!-- موی مشکی صاف -->
+            <path d="M 22 22 Q 24 12 30 13 Q 36 12 38 22 L 38 26 Q 36 18 30 19 Q 24 18 22 26 Z" fill="#1A1A1A"/>
+            <!-- موی کناری -->
+            <ellipse cx="21" cy="27" rx="2" ry="5" fill="#1A1A1A"/>
+            <ellipse cx="39" cy="27" rx="2" ry="5" fill="#1A1A1A"/>
+            <!-- 🤓 عینک - مهم! -->
+            <circle cx="26.5" cy="24" r="2.8" fill="rgba(255,255,255,0.7)" stroke="#2C2820" stroke-width="1.2"/>
+            <circle cx="33.5" cy="24" r="2.8" fill="rgba(255,255,255,0.7)" stroke="#2C2820" stroke-width="1.2"/>
+            <line x1="29.3" y1="24" x2="30.7" y2="24" stroke="#2C2820" stroke-width="1"/>
+            <!-- چشم‌ها پشت عینک -->
+            <circle cx="26.5" cy="24" r="1.1" fill="#1A1A1A"/>
+            <circle cx="33.5" cy="24" r="1.1" fill="#1A1A1A"/>
+            <!-- لبخند -->
+            <path d="M 27.5 28 Q 30 30 32.5 28" stroke="#A32D2D" fill="none" stroke-width="1"/>
+            <!-- کتاب طلایی (نماد راهنما) -->
+            <rect x="42" y="36" width="6" height="7" fill="#FFD966" stroke="#BA7517" stroke-width="0.8"/>
+            <rect x="43" y="37" width="4" height="5" fill="#FFFFFF"/>
+            <line x1="45" y1="37" x2="45" y2="42" stroke="#BA7517" stroke-width="0.5"/>
+          </svg>
+        </div>
+        <div class="char-info">
+          <div class="char-name char-sahra-name">🧚‍♀️ Sahra</div>
+          <div class="char-desc">Votre <strong>guide bienveillante</strong>.<br><span class="char-tip">Elle vous explique comment jouer dès le début !</span></div>
+        </div>
+      </div>
+
       <!-- Viviana -->
       <div class="char-card char-viviana">
         <div class="char-avatar">
@@ -750,10 +829,13 @@
                 <stop offset="100%" stop-color="#FFB0CC" stop-opacity="0"/>
               </radialGradient>
             </defs>
-            <!-- بال‌ها -->
-            <ellipse cx="14" cy="26" rx="9" ry="12" fill="#F7C1D5" opacity="0.7" stroke="#D4537E" stroke-width="0.8" transform="rotate(-15 14 26)"/>
-            <ellipse cx="46" cy="26" rx="9" ry="12" fill="#F7C1D5" opacity="0.7" stroke="#D4537E" stroke-width="0.8" transform="rotate(15 46 26)"/>
-            <!-- لباس -->
+            <!-- بال‌های صورتی شفاف -->
+            <ellipse cx="14" cy="28" rx="9" ry="13" fill="#F7C1D5" opacity="0.7" stroke="#D4537E" stroke-width="0.8" transform="rotate(-15 14 28)"/>
+            <ellipse cx="46" cy="28" rx="9" ry="13" fill="#F7C1D5" opacity="0.7" stroke="#D4537E" stroke-width="0.8" transform="rotate(15 46 28)"/>
+            <!-- موهای مشکی بلند پشت بدن -->
+            <path d="M 18 22 Q 14 38 18 50 L 24 50 Q 22 35 23 22 Z" fill="#1A1A1A"/>
+            <path d="M 42 22 Q 46 38 42 50 L 36 50 Q 38 35 37 22 Z" fill="#1A1A1A"/>
+            <!-- لباس صورتی -->
             <path d="M 22 36 L 19 50 L 41 50 L 38 36 Z" fill="#E84A5F"/>
             <path d="M 19 50 L 18 53 L 42 53 L 41 50 Z" fill="#FFD966"/>
             <!-- پاها -->
@@ -761,9 +843,11 @@
             <rect x="32" y="50" width="3" height="6" fill="#F5C4B3"/>
             <!-- سر -->
             <circle cx="30" cy="24" r="8" fill="#F5C4B3"/>
-            <!-- مو مشکی -->
-            <path d="M 22 22 Q 30 12 38 22 L 38 26 Q 36 16 30 16 Q 24 16 22 26 Z" fill="#1A1A1A"/>
-            <!-- چشم -->
+            <!-- موی مشکی روی سر (با چتری) -->
+            <path d="M 22 22 Q 24 12 30 13 Q 36 12 38 22 L 38 26 Q 36 18 30 19 Q 24 18 22 26 Z" fill="#1A1A1A"/>
+            <!-- چتری -->
+            <path d="M 24 18 Q 30 14 36 18 L 36 21 Q 30 19 24 21 Z" fill="#0A0A0A"/>
+            <!-- چشم‌ها -->
             <circle cx="27" cy="24" r="1.4" fill="#1A1A1A"/>
             <circle cx="33" cy="24" r="1.4" fill="#1A1A1A"/>
             <!-- لبخند -->
@@ -843,7 +927,9 @@
     <div class="stat"><div class="stat-label">Heure</div><div class="stat-value" id="cs4">🌅</div></div>
   </div>
 
-  <div id="help">↑ ou Espace = sauter (autant que vous voulez !) · ↓ = se baisser · clic sur le terrain pour sauter</div>
+  <div id="missionBox">
+    <strong>🎯 Votre mission :</strong> Survivez le plus longtemps possible en attrapant les concepts du Master et en évitant les obstacles.
+  </div>
 
   <div style="position: relative; width: 100%; max-width: 680px; margin: 0 auto;">
     <canvas id="cs5" width="680" height="340"></canvas>
@@ -862,25 +948,39 @@
       </div>
     </div>
     <!-- ⚰️ Game Over overlay - روی canvas نمایش داده می‌شه -->
-    <div id="gameOverOverlay" style="position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(135deg, rgba(15,15,35,0.92) 0%, rgba(60,30,80,0.92) 100%); border-radius: 18px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); text-align: center; padding: 12px 16px; box-sizing: border-box; animation: fadeIn 0.5s ease; overflow-y: auto;">
-      <div id="gameOverIcon" style="font-size: 56px; line-height: 1; margin-bottom: 8px; animation: bounce 1.5s ease-in-out infinite;">🎮</div>
-      <div style="font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: white; letter-spacing: 1px; text-shadow: 0 4px 16px rgba(0,0,0,0.5); margin-bottom: 4px;">Game Over</div>
-      <div id="gameOverRank" style="font-family: 'Fredoka', sans-serif; font-size: 18px; color: #FFD966; font-weight: 600; margin-bottom: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.4);">—</div>
-      <div style="display: flex; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center;">
-        <div style="background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3); padding: 10px 18px; border-radius: 14px; backdrop-filter: blur(10px);">
-          <div style="font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Score</div>
-          <div id="gameOverScore" style="font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: white; line-height: 1.2;">0</div>
+    <div id="gameOverOverlay" style="position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(135deg, rgba(15,15,35,0.95) 0%, rgba(60,30,80,0.95) 100%); border-radius: 18px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); text-align: center; padding: 10px 14px; box-sizing: border-box; animation: fadeIn 0.5s ease;">
+      <div id="gameOverIcon" style="font-size: 36px; line-height: 1; margin-bottom: 2px; animation: bounce 1.5s ease-in-out infinite;">🎮</div>
+      <div style="font-family: 'Fredoka', sans-serif; font-size: 20px; font-weight: 700; color: white; letter-spacing: 1px; text-shadow: 0 4px 16px rgba(0,0,0,0.5);">Game Over</div>
+      <div id="gameOverRank" style="font-family: 'Fredoka', sans-serif; font-size: 13px; color: #FFD966; font-weight: 600; margin-bottom: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.4);">—</div>
+      <div style="display: flex; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; justify-content: center;">
+        <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 8px;">
+          <div style="font-size: 8px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Score</div>
+          <div id="gameOverScore" style="font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 700; color: white; line-height: 1.1;">0</div>
         </div>
-        <div style="background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3); padding: 10px 18px; border-radius: 14px; backdrop-filter: blur(10px);">
-          <div style="font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Concepts</div>
-          <div id="gameOverConcepts" style="font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: white; line-height: 1.2;">0</div>
+        <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 8px;">
+          <div style="font-size: 8px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Concepts</div>
+          <div id="gameOverConcepts" style="font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 700; color: white; line-height: 1.1;">0</div>
         </div>
-        <div style="background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3); padding: 10px 18px; border-radius: 14px; backdrop-filter: blur(10px);">
-          <div style="font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Classement</div>
-          <div id="gameOverRankNum" style="font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: #FFD966; line-height: 1.2;">—</div>
+        <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 8px;">
+          <div style="font-size: 8px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Classement</div>
+          <div id="gameOverRankNum" style="font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 700; color: #FFD966; line-height: 1.1;">—</div>
         </div>
       </div>
-      <button id="gameOverRestartBtn" type="button" style="padding: 14px 32px; font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 600; background: linear-gradient(135deg, #1D9E75 0%, #2BB888 100%); color: white; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 8px 24px rgba(29,158,117,0.5); letter-spacing: 0.5px;">🔄 Rejouer</button>
+
+      <!-- 🎉 پیام تبریک + مفاهیم گرفته شده + موانعی که باید دوری شه -->
+      <div id="gameOverDetails" style="width: 100%; max-width: 480px; margin: 2px auto 6px;">
+        <div id="gameOverBravo" style="font-family: 'Fredoka', sans-serif; font-size: 11.5px; color: white; margin-bottom: 4px; font-weight: 500; text-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+          Bravo ! Vous avez réussi à progresser dans cette aventure.
+        </div>
+        <div id="gameOverCaught" style="display: none; background: linear-gradient(135deg, rgba(180,230,160,0.25) 0%, rgba(234,243,222,0.2) 100%); border: 1px solid rgba(180,230,160,0.5); border-radius: 7px; padding: 5px 9px; font-size: 10px; color: white; margin-bottom: 4px; text-align: left; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word;">
+          <strong style="color: #B5F0A8;">✅ Concepts attrapés :</strong> <span id="caughtList"></span>
+        </div>
+        <div id="gameOverAvoid" style="display: none; background: linear-gradient(135deg, rgba(255,180,180,0.25) 0%, rgba(252,235,235,0.2) 100%); border: 1px solid rgba(255,180,180,0.5); border-radius: 7px; padding: 5px 9px; font-size: 10px; color: white; text-align: left; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word;">
+          <strong style="color: #FFB5B5;">⛔ À éviter la prochaine fois :</strong> <span id="avoidList"></span>
+        </div>
+      </div>
+
+      <button id="gameOverRestartBtn" type="button" style="padding: 9px 22px; font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; background: linear-gradient(135deg, #1D9E75 0%, #2BB888 100%); color: white; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 18px rgba(29,158,117,0.5); letter-spacing: 0.5px; margin-top: 2px;">🔄 Rejouer</button>
     </div>
   </div>
 
@@ -888,11 +988,6 @@
     <button id="cs6" type="button">↑ Sauter</button>
     <button id="csPause" type="button">⏸ Pause</button>
     <button id="cs7" type="button">↓ Se baisser</button>
-  </div>
-
-  <div class="legend">
-    <div class="bad"><strong>À éviter :</strong> procrastination, plagiat, burn-out, scroll infini, copier-IA…</div>
-    <div class="good"><strong>À attraper :</strong> ingénierie pédagogique, scénarisation, PIC, mémoire, learning expedition…</div>
   </div>
 
   <!-- Leaderboard -->
@@ -964,81 +1059,69 @@
     resizeTimer = setTimeout(setupCanvasHiDPI, 200);
   });
 
-  // 🟢 BONUSES — فقط لغات تأیید‌شده از mastercftn.com/le-programme و سایت رسمی Unistra
+  // 🟢 BONUSES — لغات و weights دقیقاً مطابق فایل Word خانم Mohib
   var BONUSES = [
-    // UE 1.1 - Fondamentaux théoriques et pratiques de formation
-    { label: "Psychologie éducation", color: "#378ADD", emoji: "🧠" },
-    { label: "Socio-pédagogie",       color: "#378ADD", emoji: "👥" },
-    { label: "Théories du changement",color: "#7F77DD", emoji: "🔄" },
-    // UE 1.2 - Ingénierie pédagogique et innovation
-    { label: "Ingénierie pédagogique",color: "#1D9E75", emoji: "🛠️" },
-    { label: "Ingénierie de formation",color: "#1D9E75", emoji: "📐" },
-    { label: "Formation à distance",  color: "#378ADD", emoji: "🌐" },
-    { label: "Pédagogie innovante",   color: "#7F77DD", emoji: "✨" },
-    // UE 1.3 - Méthodologies de recherche
-    { label: "Recherche éducation",   color: "#BA7517", emoji: "🔬" },
-    { label: "Méthodes qualitatives", color: "#BA7517", emoji: "📝" },
-    { label: "Méthodes quantitatives",color: "#BA7517", emoji: "📊" },
-    // UE 1.4 - DDRS (Développement durable et responsabilité sociétale)
-    { label: "Inclusion",             color: "#1D9E75", emoji: "🤝" },
-    { label: "Accessibilité",         color: "#1D9E75", emoji: "♿" },
-    { label: "Participation sociale", color: "#1D9E75", emoji: "🌍" },
-    { label: "Responsabilité sociétale", color: "#1D9E75", emoji: "💚" },
-    { label: "Développement durable", color: "#1D9E75", emoji: "🌱" },
-    { label: "Transition écologique", color: "#1D9E75", emoji: "🌿" },
-    // UE 2.1 - Technologies numériques pour l'apprentissage
-    { label: "Technologies numériques", color: "#378ADD", emoji: "💻" },
-    // UE 2.2 - Intervention en milieu professionnel
-    { label: "Gestion de projet",     color: "#BA7517", emoji: "📋" },
-    { label: "Appel à projet",        color: "#BA7517", emoji: "📨" },
-    { label: "Développement org.",    color: "#BA7517", emoji: "🏢" },
-    // UE 2.3 - Ateliers méthodologiques
-    { label: "Mémoire",               color: "#7F77DD", emoji: "📖" },
-    { label: "Veille documentaire",   color: "#BA7517", emoji: "🔍" },
-    // UE 2.5 - Analyse des processus d'apprentissage
-    { label: "Théorie apprentissage", color: "#7F77DD", emoji: "🎓" },
-    { label: "Théorie de l'activité", color: "#7F77DD", emoji: "⚡" },
-    // M2 - UE 3.1 - Enjeux et défis
-    { label: "Entreprendre éducation",color: "#BA7517", emoji: "🚀" },
-    { label: "Learning expedition",   color: "#378ADD", emoji: "✈️" },
-    // UE 3.2 - Accompagnement de la transformation
-    { label: "Connaissance de soi",   color: "#7F77DD", emoji: "🪞" },
-    { label: "Gestion des émotions",  color: "#D4537E", emoji: "💗" },
-    { label: "Leadership",            color: "#BA7517", emoji: "🌟" },
-    // UE 3.3 - Méthodes de recherches
-    { label: "Conduite de recherche", color: "#BA7517", emoji: "🔬" },
-    // UE 3.4 - e-Learning
-    { label: "e-Learning",            color: "#378ADD", emoji: "💻" },
-    { label: "Conception modules",    color: "#1D9E75", emoji: "🧩" },
-    { label: "Scénarisation péd.",    color: "#1D9E75", emoji: "🎬" },
-    { label: "Design péd.",           color: "#1D9E75", emoji: "✏️" },
-    { label: "Design graphique",      color: "#7F77DD", emoji: "🎨" },
-    { label: "Communication visuelle",color: "#7F77DD", emoji: "👁️" },
-    // UE 3.5 - Analyse des environnements d'apprentissage
-    { label: "Expertise conception",  color: "#1D9E75", emoji: "⚙️" },
-    { label: "Évaluation des acquis", color: "#BA7517", emoji: "✅" },
-    // UE 4.1 - Projets collectifs
-    { label: "PIC",                   color: "#7F77DD", emoji: "💡" },
-    { label: "Communication orale",   color: "#378ADD", emoji: "🎤" },
-    { label: "Expression corporelle", color: "#378ADD", emoji: "🕺" },
-    // Méthodes pédagogiques (mastercftn.com)
-    { label: "Ateliers",              color: "#1D9E75", emoji: "🔨" },
-    { label: "Mise en situation",     color: "#1D9E75", emoji: "🎭" },
-    { label: "Pédagogie par projet",  color: "#378ADD", emoji: "📊" },
-    { label: "Jeux de rôle",          color: "#7F77DD", emoji: "🎮" },
-    { label: "Apprent. collaboratif", color: "#378ADD", emoji: "👥" },
-    // Concepts CFTN du site officiel
-    { label: "Stage",                 color: "#BA7517", emoji: "🏢" },
-    { label: "Innovation",            color: "#7F77DD", emoji: "🚀" },
-    { label: "Réflexivité",           color: "#7F77DD", emoji: "🪞" },
-    { label: "IA générative",         color: "#7F77DD", emoji: "🤖" },
-    // Compétences mentionnées
-    { label: "Conception",            color: "#1D9E75", emoji: "✏️" },
-    { label: "Expérimenter",          color: "#7F77DD", emoji: "🧪" },
-    { label: "Incarner",              color: "#BA7517", emoji: "🌟" },
-    { label: "Posture professionnelle",color: "#BA7517", emoji: "👔" },
-    { label: "Travail collaboratif",  color: "#378ADD", emoji: "🤝" },
-    { label: "Prise d'initiative",    color: "#BA7517", emoji: "⚡" }
+    // ⭐ - 1 étoile (کمتر مهم)
+    { label: "Psychologie éducation", color: "#378ADD", emoji: "🧠", w: 1 },
+    { label: "Socio-pédagogie",       color: "#378ADD", emoji: "👥", w: 1 },
+    { label: "Méthodes qualitatives", color: "#BA7517", emoji: "📝", w: 1 },
+    { label: "Méthodes quantitatives",color: "#BA7517", emoji: "📊", w: 1 },
+    { label: "Inclusion",             color: "#1D9E75", emoji: "🤝", w: 1 },
+    { label: "Accessibilité",         color: "#1D9E75", emoji: "♿", w: 1 },
+    { label: "Appel à projet",        color: "#BA7517", emoji: "📨", w: 1 },
+    // ⭐⭐ - 2 étoiles
+    { label: "Théories du changement",color: "#7F77DD", emoji: "🔄", w: 2 },
+    { label: "Participation sociale", color: "#1D9E75", emoji: "🌍", w: 2 },
+    { label: "Responsabilité sociétale", color: "#1D9E75", emoji: "💚", w: 2 },
+    { label: "Développement durable", color: "#1D9E75", emoji: "🌱", w: 2 },
+    { label: "Transition écologique", color: "#1D9E75", emoji: "🌿", w: 2 },
+    { label: "Développement organisationnel", color: "#BA7517", emoji: "🏢", w: 2 },
+    { label: "Veille documentaire",   color: "#BA7517", emoji: "🔍", w: 2 },
+    { label: "Théorie de l'activité", color: "#7F77DD", emoji: "⚡", w: 2 },
+    { label: "Communication visuelle",color: "#7F77DD", emoji: "👁️", w: 2 },
+    { label: "Expression corporelle", color: "#378ADD", emoji: "🕺", w: 2 },
+    { label: "Ateliers",              color: "#1D9E75", emoji: "🔨", w: 2 },
+    { label: "Mise en situation",     color: "#1D9E75", emoji: "🎭", w: 2 },
+    { label: "Jeux de rôle",          color: "#7F77DD", emoji: "🎮", w: 2 },
+    { label: "IA générative",         color: "#7F77DD", emoji: "🤖", w: 2 },
+    { label: "Incarner",              color: "#BA7517", emoji: "🌟", w: 2 },
+    // ⭐⭐⭐ - 3 étoiles
+    { label: "Ingénierie de formation",color: "#1D9E75", emoji: "📐", w: 3 },
+    { label: "Formation à distance",  color: "#378ADD", emoji: "🌐", w: 3 },
+    { label: "Recherche éducation",   color: "#BA7517", emoji: "🔬", w: 3 },
+    { label: "Théorie apprentissage", color: "#7F77DD", emoji: "🎓", w: 3 },
+    { label: "Design graphique",      color: "#7F77DD", emoji: "🎨", w: 3 },
+    { label: "Communication orale",   color: "#378ADD", emoji: "🎤", w: 3 },
+    { label: "Posture professionnelle",color: "#BA7517", emoji: "👔", w: 3 },
+    // ⭐⭐⭐⭐ - 4 étoiles
+    { label: "Mémoire",               color: "#7F77DD", emoji: "📖", w: 4 },
+    { label: "Entreprendre éducation", color: "#BA7517", emoji: "🚀", w: 4 },
+    { label: "Learning expedition",   color: "#378ADD", emoji: "✈️", w: 4 },
+    { label: "Connaissance de soi",   color: "#7F77DD", emoji: "🪞", w: 4 },
+    { label: "Gestion des émotions",  color: "#D4537E", emoji: "💗", w: 4 },
+    { label: "Leadership",            color: "#BA7517", emoji: "🌟", w: 4 },
+    { label: "Conduite de recherche", color: "#BA7517", emoji: "🔬", w: 4 },
+    { label: "Apprentissage collaboratif", color: "#378ADD", emoji: "👥", w: 4 },
+    { label: "Stage",                 color: "#BA7517", emoji: "🏢", w: 4 },
+    { label: "Prise d'initiative",    color: "#BA7517", emoji: "⚡", w: 4 },
+    // ⭐⭐⭐⭐⭐ - 5 étoiles (très important)
+    { label: "Ingénierie pédagogique",color: "#1D9E75", emoji: "🛠️", w: 5 },
+    { label: "Pédagogie innovante",   color: "#7F77DD", emoji: "✨", w: 5 },
+    { label: "Technologies numériques", color: "#378ADD", emoji: "💻", w: 5 },
+    { label: "Gestion de projet",     color: "#BA7517", emoji: "📋", w: 5 },
+    { label: "e-Learning",            color: "#378ADD", emoji: "💻", w: 5 },
+    { label: "Conception modules",    color: "#1D9E75", emoji: "🧩", w: 5 },
+    { label: "Scénarisation pédagogique", color: "#1D9E75", emoji: "🎬", w: 5 },
+    { label: "Design pédagogique",    color: "#1D9E75", emoji: "✏️", w: 5 },
+    { label: "Expertise conception",  color: "#1D9E75", emoji: "⚙️", w: 5 },
+    { label: "Évaluation des acquis", color: "#BA7517", emoji: "✅", w: 5 },
+    { label: "Projet, Innovation, Conception (PIC)", color: "#7F77DD", emoji: "💡", w: 5 },
+    { label: "Pédagogie par projet",  color: "#378ADD", emoji: "📊", w: 5 },
+    { label: "Innovation",            color: "#7F77DD", emoji: "🚀", w: 5 },
+    { label: "Réflexivité",           color: "#7F77DD", emoji: "🪞", w: 5 },
+    { label: "Conception",            color: "#1D9E75", emoji: "✏️", w: 5 },
+    { label: "Expérimenter",          color: "#7F77DD", emoji: "🧪", w: 5 },
+    { label: "Travail collaboratif",  color: "#378ADD", emoji: "🤝", w: 5 }
   ];
 
   // 🔴 OBSTACLES — فقط چیزهای بدون تردید منفی
@@ -1071,15 +1154,22 @@
       running: true,
       player: { x: 80, y: GROUND_Y, vy: 0, w: 30, h: 46, onGround: true, jumpsLeft: 2, ducking: false, runFrame: 0, emotion: "neutral", emotionTimer: 0, hairWave: 0 },
       items: [], score: 0, concepts: 0, lives: 3,
+      caughtConcepts: [], hitObstacles: [],
       speed: 2, spawnCd: 150,
       groundOffset: 0, farOffset: 0, midOffset: 0, nearOffset: 0, cloudOffset: 0,
       flash: 0, flashColor: null,
       popups: [], particles: [], dustTimer: 0, timePhase: 0, stars: [],
       cigognes: [{ x: 100, y: 70, phase: 0 }, { x: 320, y: 50, phase: 1 }, { x: 540, y: 80, phase: 2 }],
-      viviana: null,            // پری جادویی، گاهی ظاهر می‌شه
-      vivianaCooldown: 600,     // اولین ظهور بعد از ۶۰۰ فریم (~ ۱۰ ثانیه)
-      alireza: null,            // شیطون که مانع اضافه می‌کنه
-      alirezaCooldown: 900,     // اولین ظهور بعد از ~ ۱۵ ثانیه
+      viviana: null,
+      vivianaCooldown: 600,
+      alireza: null,
+      alirezaCooldown: 900,
+      // 🧚‍♀️ Sahra
+      sahra: null,
+      sahraShownForItem: [],    // لیست index آیتم‌هایی که Sahra توضیح داده
+      sahraShownViviana: false,
+      sahraShownAlireza: false,
+      totalSpawned: 0,
       shownEnd: false
     };
     for (var i = 0; i < 50; i++) state.stars.push({ x: Math.random() * W, y: Math.random() * GROUND_Y * 0.65, size: Math.random() * 1.5 + 0.5, twinkle: Math.random() * Math.PI * 2 });
@@ -1089,6 +1179,14 @@
     // ⏸ پنهان کردن pause overlay و برگرداندن متن دکمه
     var pov = document.getElementById("pauseOverlay"); if (pov) pov.style.display = "none";
     var pBtn = document.getElementById("csPause"); if (pBtn) pBtn.textContent = "⏸ Pause";
+    // ▶ نمایش دوباره دکمه‌های بازی و فعال کردنشون
+    var ctrlDiv = document.querySelector(".controls");
+    if (ctrlDiv) ctrlDiv.style.display = "";
+    var allBtns = ["cs6", "cs7", "csPause"];
+    for (var di = 0; di < allBtns.length; di++) {
+      var rb = document.getElementById(allBtns[di]);
+      if (rb) { rb.disabled = false; rb.style.opacity = "1"; rb.style.pointerEvents = ""; }
+    }
     // ⚡ بعد از پنهان شدن overlay، اندازه canvas رو دوباره چک کن
     setupCanvasHiDPI();
     lastTs = performance.now();
@@ -1131,6 +1229,38 @@
     document.getElementById("gameOverScore").textContent = fs;
     document.getElementById("gameOverConcepts").textContent = state.concepts;
     document.getElementById("gameOverRankNum").textContent = myRank > 0 ? "#" + myRank : "—";
+
+    // 🎉 لیست مفاهیم گرفته شده
+    var caught = (state.caughtConcepts || []).slice(0, 8);  // حداکثر ۸ تا نشون بده
+    var caughtEl = document.getElementById("gameOverCaught");
+    var caughtListEl = document.getElementById("caughtList");
+    if (caught.length > 0) {
+      caughtListEl.textContent = caught.join(", ") + (state.caughtConcepts.length > 8 ? " …" : "");
+      caughtEl.style.display = "block";
+    } else {
+      caughtEl.style.display = "none";
+    }
+
+    // ⛔ لیست موانعی که برخورد کرده
+    var hit = (state.hitObstacles || []).slice(0, 6);
+    var avoidEl = document.getElementById("gameOverAvoid");
+    var avoidListEl = document.getElementById("avoidList");
+    if (hit.length > 0) {
+      avoidListEl.textContent = hit.join(", ");
+      avoidEl.style.display = "block";
+    } else {
+      avoidEl.style.display = "none";
+    }
+
+    // پیام تبریک متناسب با امتیاز
+    var bravoEl = document.getElementById("gameOverBravo");
+    if (fs >= 500) {
+      bravoEl.textContent = "Bravo ! Vous avez brillamment progressé dans cette aventure. 🎓";
+    } else if (fs >= 200) {
+      bravoEl.textContent = "Bravo ! Vous avez réussi à progresser dans cette aventure.";
+    } else {
+      bravoEl.textContent = "Belle tentative ! Vous progresserez encore plus la prochaine fois. 💪";
+    }
     document.getElementById("gameOverOverlay").classList.add("visible");
 
     document.getElementById("shareTitle").innerHTML = icon + " " + rank + "<br><span style='font-weight: 400; font-size: 14px;'>" + escapeHtml(playerName) + " · Score : " + fs + " · " + state.concepts + " concept" + (state.concepts > 1 ? "s" : "") + " attrapé" + (state.concepts > 1 ? "s" : "") + "</span>" + rankText;
@@ -1148,6 +1278,10 @@
     }, 1500);
 
     var hb = document.getElementById("hintBadge"); if (hb) hb.style.opacity = "0";
+
+    // ⛔ حذف کامل دکمه‌های بازی - فقط Rejouer توی overlay در دسترسه
+    var controlsDiv = document.querySelector(".controls");
+    if (controlsDiv) controlsDiv.style.display = "none";
   }
 
   function jump() {
@@ -1161,20 +1295,82 @@
   function duck(a) { if (state && state.running) state.player.ducking = a && state.player.onGround; }
 
   function spawn() {
-    // توزیع تنوع:
-    // - ۳۰٪ بونوس زمینی
-    // - ۲۰٪ بونوس پرنده
-    // - ۲۵٪ مانع زمینی
-    // - ۲۵٪ مانع پرنده
-    var r = Math.random();
+    // شمارنده برای آموزشی نگه داشتن hint
+    state.totalSpawned = (state.totalSpawned || 0) + 1;
+
     var isBonus, flying;
-    if (r < 0.30)      { isBonus = true;  flying = false; }
-    else if (r < 0.50) { isBonus = true;  flying = true;  }
-    else if (r < 0.75) { isBonus = false; flying = false; }
-    else               { isBonus = false; flying = true;  }
+    // 📚 سه آیتم اول controlled برای آموزش
+    if (state.totalSpawned === 1) {
+      // اولی: بونوس زمینی (راحت)
+      isBonus = true; flying = false;
+    } else if (state.totalSpawned === 2) {
+      // دومی: مانع زمینی (که بپره)
+      isBonus = false; flying = false;
+    } else if (state.totalSpawned === 3) {
+      // سومی: یا بونوس پرنده یا مانع پرنده (variety)
+      var third = Math.random() < 0.5;
+      isBonus = third; flying = true;
+    } else {
+      // بقیه: random طبق توزیع معمولی
+      var r = Math.random();
+      if (r < 0.30)      { isBonus = true;  flying = false; }
+      else if (r < 0.50) { isBonus = true;  flying = true;  }
+      else if (r < 0.75) { isBonus = false; flying = false; }
+      else               { isBonus = false; flying = true;  }
+    }
 
     var pool = isBonus ? BONUSES : OBSTACLES;
-    var d = pool[Math.floor(Math.random() * pool.length)];
+    var d;
+    if (isBonus) {
+      // 🎯 سیستم تکرار نشدنی: لیست استفاده‌نشده با weights
+      // وقتی همه استفاده شدن، لیست دوباره پر می‌شه
+      if (!state.availableBonuses || state.availableBonuses.length === 0) {
+        // پر کردن لیست با entries مکرر بر اساس weight
+        state.availableBonuses = [];
+        for (var bi = 0; bi < pool.length; bi++) {
+          var w = pool[bi].w || 1;
+          for (var wi = 0; wi < w; wi++) {
+            state.availableBonuses.push(bi);  // index رو نگه می‌داریم
+          }
+        }
+        // shuffle
+        for (var si = state.availableBonuses.length - 1; si > 0; si--) {
+          var sj = Math.floor(Math.random() * (si + 1));
+          var tmp = state.availableBonuses[si];
+          state.availableBonuses[si] = state.availableBonuses[sj];
+          state.availableBonuses[sj] = tmp;
+        }
+        // حذف duplicates - فقط هر index یک بار باقی بمونه (حتی با weights، باز هم unique)
+        var seen = {};
+        var unique = [];
+        for (var di = 0; di < state.availableBonuses.length; di++) {
+          var idx = state.availableBonuses[di];
+          if (!seen[idx]) {
+            seen[idx] = true;
+            unique.push(idx);
+          }
+        }
+        state.availableBonuses = unique;
+      }
+      // یکی از لیست بردار
+      var pickedIdx = state.availableBonuses.shift();
+      d = pool[pickedIdx];
+    } else {
+      // برای موانع هم همین کار (ولی تعداد کمه پس تکرار سریع‌تره)
+      if (!state.availableObstacles || state.availableObstacles.length === 0) {
+        state.availableObstacles = [];
+        for (var oi = 0; oi < pool.length; oi++) state.availableObstacles.push(oi);
+        // shuffle
+        for (var osi = state.availableObstacles.length - 1; osi > 0; osi--) {
+          var osj = Math.floor(Math.random() * (osi + 1));
+          var otmp = state.availableObstacles[osi];
+          state.availableObstacles[osi] = state.availableObstacles[osj];
+          state.availableObstacles[osj] = otmp;
+        }
+      }
+      var pickedOIdx = state.availableObstacles.shift();
+      d = pool[pickedOIdx];
+    }
 
     var y, h;
     if (isBonus) {
@@ -1188,14 +1384,20 @@
       if (flying) h = 24;  // ارتفاع کوتاه برای collision دقیق
     }
     var tw = d.label.length * 11 + 70;
-    state.items.push({
+    var newItem = {
       type: isBonus ? "bonus" : "obstacle",
       label: d.label, color: d.color, emoji: d.emoji,
       x: W + 20, y: y,
       w: Math.max(110, tw), h: h,
       hit: false, flying: flying,
       pulse: 0, bobOffset: Math.random() * Math.PI * 2
-    });
+    };
+    state.items.push(newItem);
+
+    // 🧚‍♀️ Sahra برای ۵ آیتم اول راهنمایی کنه (اگه قبلاً نیومده و Viviana/Alireza هم نیست)
+    if (state.totalSpawned <= 5 && !state.sahra && !state.viviana && !state.alireza) {
+      spawnSahra("item", newItem);
+    }
   }
 
   function pBox() {
@@ -1232,34 +1434,8 @@
 
   function updateHint() {
     var badge = document.getElementById("hintBadge");
-    if (!badge) return;
-    if (!state || !state.items) { badge.style.opacity = "0"; return; }
-    // پیدا کردن نزدیک‌ترین آیتم که هنوز گرفته نشده
-    var next = null;
-    for (var i = 0; i < state.items.length; i++) {
-      var it = state.items[i];
-      if (!it || it.hit) continue;
-      if (typeof it.x !== "number" || typeof it.w !== "number") continue;
-      if (it.x + it.w < state.player.x) continue;
-      if (!next || it.x < next.x) next = it;
-    }
-    if (!next || !next.emoji || !next.label) { badge.style.opacity = "0"; return; }
-    var dist = next.x - state.player.x;
-    // فقط وقتی توی محدوده‌ی ۴۵۰ پیکسلی نزدیک شد نشون بده
-    if (dist > 450) { badge.style.opacity = "0"; return; }
-
-    var isBonus = next.type === "bonus";
-    var action;
-    if (isBonus) action = next.flying ? "→ sautez pour l'attraper !" : "→ courez dessus !";
-    else action = next.flying ? "→ BAISSEZ-VOUS !" : "→ SAUTEZ !";
-
-    document.getElementById("hintIcon").textContent = next.emoji + " ";
-    document.getElementById("hintLabel").textContent = next.label;
-    document.getElementById("hintLabel").style.color = next.color;
-    document.getElementById("hintAction").textContent = action;
-    document.getElementById("hintAction").style.color = isBonus ? "#0F6E56" : "#A32D2D";
-    badge.style.borderColor = next.color;
-    badge.style.opacity = "1";
+    if (badge) badge.style.opacity = "0";
+    // hint badge کاملاً غیرفعال - Sahra جایگزینش شده
   }
 
   function update(dt) {
@@ -1282,11 +1458,22 @@
 
     state.spawnCd--;
     if (state.spawnCd <= 0) {
-      spawn();
-      // فاصله‌ی spawn: در مرحله‌ی ۱ زیاد، با امتیاز کم‌تر می‌شه
-      // شروع: ~۱۸۰ فریم (۳ ثانیه)، پایان: ~۶۰ فریم (۱ ثانیه)
-      var spawnGap = Math.max(60, 180 - state.score / 30);
-      state.spawnCd = spawnGap + Math.floor(Math.random() * 40);
+      // 📚 برای ۳ آیتم اول: اگه Sahra هنوز حرف می‌زنه، صبر کن
+      if (state.totalSpawned < 3 && state.sahra) {
+        // wait - cooldown رو بذار روی یه عدد کوچک تا فریم بعد دوباره چک کنه
+        state.spawnCd = 10;
+      } else {
+        spawn();
+        // 📚 برای ۳ آیتم اول فاصله‌ی بیشتر تا Sahra فرصت توضیح داشته باشه
+        var spawnGap;
+        if (state.totalSpawned <= 3) {
+          spawnGap = 280;  // ~۴.۷ ثانیه فاصله
+        } else {
+          // بقیه: شروع ~۱۸۰ فریم، با امتیاز کم‌تر می‌شه
+          spawnGap = Math.max(60, 180 - state.score / 30);
+        }
+        state.spawnCd = spawnGap + Math.floor(Math.random() * 40);
+      }
     }
 
     for (var ci = 0; ci < state.cigognes.length; ci++) {
@@ -1294,9 +1481,39 @@
       if (c.x < -50) { c.x = W + 50; c.y = 40 + Math.random() * 60; }
     }
 
+    // 🚨 spawn معطل Alireza بعد از اینکه Sahra رفت
+    if (state.alirezaPendingSpawn && !state.sahra && !state.alireza) {
+      state.alirezaPendingSpawn--;
+      if (state.alirezaPendingSpawn <= 0) {
+        state.alireza = {
+          mode: "approach",
+          x: W + 60, y: 110,
+          targetX: 0, targetY: 0,
+          phase: 0, sparkleTimer: 0,
+          evilItem: null,
+          deliverTimer: 0
+        };
+        state.alirezaPendingSpawn = 0;
+        // cooldown برای دفعات بعد
+        var alirezaCd = Math.max(400, 900 - state.score / 5);
+        state.alirezaCooldown = alirezaCd + Math.floor(Math.random() * 400);
+      }
+    }
+
+    // 🧚‍♀️ SAHRA — فرشته‌ی راهنما
+    if (state.sahra) {
+      updateSahra();
+    }
+    // اگه اولین Viviana ظاهر شد و هنوز Sahra توضیح نداده
+    if (state.viviana && !state.sahraShownViviana && !state.sahra) {
+      state.sahraShownViviana = true;
+      spawnSahra("viviana");
+    }
+    // (Alireza با تأخیر بعد از Sahra میاد - منطق در بالا)
+
     // ✨ VIVIANA — از راست میاد، قلب می‌اندازه، می‌ره
-    // ⚠️ همزمان با Alireza ظاهر نمی‌شه
-    if (!state.viviana && !state.alireza) {
+    // ⚠️ همزمان با Alireza ظاهر نمی‌شه (و همزمان با Sahra هم نه)
+    if (!state.viviana && !state.alireza && !state.sahra) {
       state.vivianaCooldown--;
       if (state.vivianaCooldown <= 0) {
         if (Math.random() < 0.3) {
@@ -1419,24 +1636,33 @@
     }
 
     // 😈 ALIREZA — شیطون که میاد و مانع اضافه می‌کنه (بیشتر با امتیاز بالا)
-    // ⚠️ همزمان با Viviana ظاهر نمی‌شه
-    if (!state.alireza && !state.viviana) {
+    // ⚠️ همزمان با Viviana ظاهر نمی‌شه و Sahra هم نه
+    if (!state.alireza && !state.viviana && !state.sahra) {
       state.alirezaCooldown--;
       if (state.alirezaCooldown <= 0) {
         // احتمال ظهور با امتیاز بیشتر می‌شه: ۳۰٪ → ۷۰٪
         var alirezaChance = Math.min(0.7, 0.30 + state.score / 3000);
         if (Math.random() < alirezaChance) {
-          state.alireza = {
-            mode: "approach",
-            x: W + 60, y: 110,    // از راست بیرون از canvas (مثل Viviana)
-            targetX: 0, targetY: 0,
-            phase: 0, sparkleTimer: 0,
-            evilItem: null,
-            deliverTimer: 0
-          };
-          // cooldown کوتاه‌تر با امتیاز: از ۹۰۰ به ۴۰۰
-          var alirezaCd = Math.max(400, 900 - state.score / 5);
-          state.alirezaCooldown = alirezaCd + Math.floor(Math.random() * 400);
+          // 🚨 اولین بار Alireza: Sahra اول هشدار بده، بعد Alireza بیاد
+          if (!state.sahraShownAlireza) {
+            state.sahraShownAlireza = true;
+            spawnSahra("alireza");
+            // Alireza با تأخیر می‌اد (بعد از اینکه Sahra توضیح داد)
+            state.alirezaPendingSpawn = 180;  // ~۳ ثانیه تأخیر
+            state.alirezaCooldown = 9999;  // فعلاً جلوگیری از spawn معمولی
+          } else {
+            state.alireza = {
+              mode: "approach",
+              x: W + 60, y: 110,
+              targetX: 0, targetY: 0,
+              phase: 0, sparkleTimer: 0,
+              evilItem: null,
+              deliverTimer: 0
+            };
+            // cooldown کوتاه‌تر با امتیاز: از ۹۰۰ به ۴۰۰
+            var alirezaCd = Math.max(400, 900 - state.score / 5);
+            state.alirezaCooldown = alirezaCd + Math.floor(Math.random() * 400);
+          }
         } else {
           state.alirezaCooldown = 200;
         }
@@ -1514,6 +1740,11 @@
         it.hit = true;
         if (it.type === "bonus") {
           state.score += 50; state.concepts++;
+          // 📚 ذخیره مفاهیم گرفته شده (unique)
+          if (!state.caughtConcepts) state.caughtConcepts = [];
+          if (state.caughtConcepts.indexOf(it.label) === -1) {
+            state.caughtConcepts.push(it.label);
+          }
           state.flash = 8; state.flashColor = "rgba(29, 158, 117, 0.18)";
           state.popups.push({ x: it.x + it.w/2, y: it.y - 45, txt: "+50", color: "#0F6E56", life: 50 });
           for (var pi = 0; pi < 18; pi++) {
@@ -1524,6 +1755,11 @@
         } else {
           state.lives--;
           state.score = Math.max(0, state.score - 100);  // ⛔ پنالتی ۱۰۰ امتیاز برای برخورد به مانع
+          // 📚 ذخیره موانعی که برخورد کرده (unique)
+          if (!state.hitObstacles) state.hitObstacles = [];
+          if (state.hitObstacles.indexOf(it.label) === -1) {
+            state.hitObstacles.push(it.label);
+          }
           state.flash = 14; state.flashColor = "rgba(226, 75, 74, 0.4)";
           state.popups.push({ x: it.x + it.w/2, y: it.y - 45, txt: "-1 ♥  -100", color: "#A32D2D", life: 50 });
           for (var si = 0; si < 14; si++) state.particles.push({ x: it.x + it.w/2 + (Math.random() - 0.5) * 30, y: it.y - it.h/2 + (Math.random() - 0.5) * 20, vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6 - 2, life: 25, maxLife: 25, color: "#E24B4A", size: Math.random() * 4 + 2, type: "smoke" });
@@ -1661,6 +1897,7 @@
     drawPlayer(state.player);
     drawViviana();
     drawAlireza();
+    drawSahra();
 
     for (var psi = 0; psi < state.particles.length; psi++) {
       var p2 = state.particles[psi]; if (p2.type === "dust") continue;
@@ -1705,6 +1942,320 @@
     ctx.beginPath(); ctx.ellipse(x - 10, y - 4 - wf, 5, 2, 0.3, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = "#E24B4A"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x - 2, y + 4); ctx.lineTo(x - 5, y + 9); ctx.moveTo(x + 1, y + 4); ctx.lineTo(x - 2, y + 9); ctx.stroke();
+  }
+
+  // 🧚‍♀️ SAHRA - فرشته‌ی راهنما با عینک و موهای مشکی
+  function spawnSahra(context, item) {
+    // context: "item" / "viviana" / "alireza"
+    // Sahra نزدیک پلیر spawn می‌شه که فوراً قابل دیدن باشه
+    state.sahra = {
+      context: context,
+      mode: "approach",
+      x: state.player.x + 250, y: 50,
+      targetX: 0, targetY: 0,
+      phase: 0,
+      speakTimer: 0,
+      message: "",
+      messageColor: "#9B5DE5",
+      duration: 150,
+      targetItem: item || null   // 🎯 آیتم مرتبط برای ردیابی فاصله
+    };
+    if (context === "item" && item) {
+      // پیام بر اساس نوع آیتم - با اسم کلمه
+      if (item.type === "bonus") {
+        if (item.flying) {
+          state.sahra.message = "✨ Attrapez « " + item.label + " » ! Sautez !";
+        } else {
+          state.sahra.message = "✨ Attrapez « " + item.label + " » ! Courez dessus !";
+        }
+        state.sahra.messageColor = "#1D7A5C";
+      } else {
+        // obstacle
+        if (item.flying) {
+          state.sahra.message = "⚠️ Évitez « " + item.label + " » ! Baissez-vous !";
+        } else {
+          state.sahra.message = "⚠️ Évitez « " + item.label + " » ! Sautez par-dessus !";
+        }
+        state.sahra.messageColor = "#A32D2D";
+      }
+      state.sahra.duration = 130;  // کمی طولانی‌تر چون اسم آیتم اضافه شد
+    } else if (context === "viviana") {
+      state.sahra.message = "✨ Viviana arrive ! Attrapez son cœur pour gagner une vie !";
+      state.sahra.messageColor = "#D4537E";
+      state.sahra.duration = 160;
+    } else if (context === "alireza") {
+      state.sahra.message = "😈 Attention à Alireza ! Évitez son piège !";
+      state.sahra.messageColor = "#A32D2D";
+      state.sahra.duration = 160;
+    }
+  }
+
+  function updateSahra() {
+    var s = state.sahra;
+    s.phase += 0.1;
+
+    if (s.mode === "approach") {
+      // میاد به سمت پلیر، بالاتر از سر پلیر - سریع
+      s.targetX = state.player.x + 130;
+      s.targetY = 80;
+      s.x += (s.targetX - s.x) * 0.18;  // سرعت بیشتر
+      s.y += (s.targetY - s.y) * 0.18 + Math.sin(s.phase) * 0.3;
+      var dx = s.x - s.targetX, dy = s.y - s.targetY;
+      if (dx * dx + dy * dy < 1500) {
+        s.mode = "speak";
+        s.speakTimer = 0;
+      }
+    }
+    else if (s.mode === "speak") {
+      s.speakTimer++;
+      // باقی مونده با پلیر حرکت می‌کنه
+      s.x = state.player.x + 130 + Math.sin(s.phase * 0.5) * 4;
+      s.y = 80 + Math.sin(s.phase) * 3;
+      // اگه برای آیتم خاصه، تا آیتم از پلیر بگذره بمونه
+      if (s.context === "item" && s.targetItem && !s.targetItem.hit) {
+        // اگه آیتم هنوز نرسیده، بمون
+        if (s.targetItem.x > state.player.x - 20) {
+          return;
+        }
+      }
+      // duration بر اساس نوع context تنظیم شده
+      if (s.speakTimer > (s.duration || 150)) {
+        s.mode = "retreat";
+      }
+    }
+    else if (s.mode === "retreat") {
+      // به سمت بالا-راست خارج می‌شه
+      s.x += 3 + state.speed * 0.5;
+      s.y -= 2;
+      s.y += Math.sin(s.phase) * 0.3;
+      if (s.x > W + 60 || s.y < -50) {
+        state.sahra = null;
+      }
+    }
+  }
+
+  function drawSahra() {
+    if (!state.sahra) return;
+    var s = state.sahra;
+    var x = s.x, y = s.y;
+    var bob = Math.sin(s.phase) * 2;
+    var wingFlap = Math.sin(s.phase * 3) * 3;
+
+    // هاله‌ی آبی-بنفش پشت Sahra
+    var haloGrad = ctx.createRadialGradient(x, y - 5 + bob, 5, x, y - 5 + bob, 35);
+    haloGrad.addColorStop(0, "rgba(155, 93, 229, 0.45)");
+    haloGrad.addColorStop(1, "rgba(155, 93, 229, 0)");
+    ctx.fillStyle = haloGrad;
+    ctx.beginPath();
+    ctx.arc(x, y - 5 + bob, 35, 0, Math.PI * 2);
+    ctx.fill();
+
+    // بال‌های آبی شفاف (پشت بدن)
+    ctx.fillStyle = "rgba(180, 220, 255, 0.7)";
+    ctx.strokeStyle = "#5DB8FF";
+    ctx.lineWidth = 1.2;
+    // بال چپ
+    ctx.save();
+    ctx.translate(x - 7, y - 2 + bob);
+    ctx.rotate(-0.3 + wingFlap * 0.05);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 9, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+    // بال راست
+    ctx.save();
+    ctx.translate(x + 7, y - 2 + bob);
+    ctx.rotate(0.3 - wingFlap * 0.05);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 9, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+
+    // لباس آبی-بنفش (بدن)
+    ctx.fillStyle = "#9B5DE5";
+    ctx.beginPath();
+    ctx.moveTo(x - 7, y + 4 + bob);
+    ctx.lineTo(x - 9, y + 18 + bob);
+    ctx.lineTo(x + 9, y + 18 + bob);
+    ctx.lineTo(x + 7, y + 4 + bob);
+    ctx.closePath();
+    ctx.fill();
+    // لبه‌ی طلایی
+    ctx.fillStyle = "#FFD966";
+    ctx.fillRect(x - 9, y + 17 + bob, 18, 2);
+
+    // پاهای کوچک
+    ctx.fillStyle = "#F5C4B3";
+    ctx.fillRect(x - 3, y + 18 + bob, 2, 4);
+    ctx.fillRect(x + 1, y + 18 + bob, 2, 4);
+
+    // سر
+    ctx.fillStyle = "#F5C4B3";
+    ctx.beginPath();
+    ctx.arc(x, y - 4 + bob, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // موهای مشکی صاف
+    ctx.fillStyle = "#1A1A1A";
+    ctx.beginPath();
+    ctx.moveTo(x - 7, y - 5 + bob);
+    ctx.quadraticCurveTo(x - 9, y - 12 + bob, x - 5, y - 11 + bob);
+    ctx.quadraticCurveTo(x - 3, y - 13 + bob, x, y - 12 + bob);
+    ctx.quadraticCurveTo(x + 3, y - 13 + bob, x + 5, y - 11 + bob);
+    ctx.quadraticCurveTo(x + 9, y - 12 + bob, x + 7, y - 5 + bob);
+    ctx.lineTo(x + 7, y - 3 + bob);
+    ctx.quadraticCurveTo(x, y - 7 + bob, x - 7, y - 3 + bob);
+    ctx.closePath();
+    ctx.fill();
+    // موی کناری (شال)
+    ctx.beginPath();
+    ctx.ellipse(x - 8, y - 1 + bob, 2.5, 5, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(x + 8, y - 1 + bob, 2.5, 5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 🤓 عینک - مهم!
+    ctx.strokeStyle = "#2C2820";
+    ctx.lineWidth = 1.3;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+    // فریم چپ
+    ctx.beginPath();
+    ctx.arc(x - 3, y - 4 + bob, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // فریم راست
+    ctx.beginPath();
+    ctx.arc(x + 3, y - 4 + bob, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // پل عینک
+    ctx.beginPath();
+    ctx.moveTo(x - 1, y - 4 + bob);
+    ctx.lineTo(x + 1, y - 4 + bob);
+    ctx.stroke();
+    // چشم‌ها پشت عینک
+    ctx.fillStyle = "#1A1A1A";
+    ctx.beginPath();
+    ctx.arc(x - 3, y - 4 + bob, 1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + 3, y - 4 + bob, 1, 0, Math.PI * 2);
+    ctx.fill();
+    // لبخند
+    ctx.strokeStyle = "#A32D2D";
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.arc(x, y - 1 + bob, 2, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+
+    // 📚 کتاب کوچک کنار دستش (نماد راهنما)
+    ctx.fillStyle = "#FFD966";
+    ctx.fillRect(x + 8, y + 8 + bob, 5, 6);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(x + 9, y + 9 + bob, 3, 4);
+    ctx.strokeStyle = "#BA7517";
+    ctx.lineWidth = 0.8;
+    ctx.strokeRect(x + 8, y + 8 + bob, 5, 6);
+
+    // نام Sahra
+    if (s.mode === "approach" || s.mode === "speak") {
+      ctx.font = "bold 13px Inter, sans-serif";
+      ctx.textAlign = "center";
+      var nameText = "🧚‍♀️ SAHRA 🤓";
+      var nameWidth = ctx.measureText(nameText).width;
+      var bgX = x - nameWidth/2 - 8, bgY = y - 32 + bob, bgW = nameWidth + 16, bgH = 18;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+      rr(bgX, bgY, bgW, bgH, 9, true, false);
+      ctx.strokeStyle = "#9B5DE5";
+      ctx.lineWidth = 2;
+      rr(bgX, bgY, bgW, bgH, 9, false, true);
+      ctx.fillStyle = "#9B5DE5";
+      ctx.textBaseline = "middle";
+      ctx.fillText(nameText, x, bgY + bgH/2);
+      ctx.textBaseline = "alphabetic";
+    }
+
+    // پیام راهنمایی (حباب گفتگو)
+    if (s.mode === "speak") {
+      var msg = s.message;
+      ctx.font = "600 14px Inter, sans-serif";
+      ctx.textAlign = "center";
+      var msgWidth = ctx.measureText(msg).width;
+      var maxBubbleW = Math.min(W - 40, msgWidth + 30);
+
+      // اگه متن خیلی طولانیه، wrap کن
+      var lines = [msg];
+      if (msgWidth + 30 > W - 40) {
+        // ساده‌سازی: یه split نقطه‌ی نزدیک به وسط پیدا کن
+        var midIdx = Math.floor(msg.length / 2);
+        var spaceIdx = msg.lastIndexOf(" ", midIdx + 5);
+        if (spaceIdx > 5) {
+          lines = [msg.substring(0, spaceIdx), msg.substring(spaceIdx + 1)];
+        }
+      }
+      // عرض = ماکزیمم عرض خطوط
+      maxBubbleW = 0;
+      for (var li = 0; li < lines.length; li++) {
+        var lw = ctx.measureText(lines[li]).width;
+        if (lw > maxBubbleW) maxBubbleW = lw;
+      }
+      maxBubbleW += 30;
+
+      var bubbleH = 18 + lines.length * 20;
+      var bubbleX = x - maxBubbleW / 2;
+      // اگه bubble از کنار صفحه خارج می‌شه، جابجا کن
+      if (bubbleX < 10) bubbleX = 10;
+      if (bubbleX + maxBubbleW > W - 10) bubbleX = W - 10 - maxBubbleW;
+      var bubbleY = y + 28 + bob;
+
+      // سایه
+      ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+      rr(bubbleX + 2, bubbleY + 2, maxBubbleW, bubbleH, 12, true, false);
+      // حباب
+      ctx.fillStyle = "#FFFFFF";
+      rr(bubbleX, bubbleY, maxBubbleW, bubbleH, 12, true, false);
+      ctx.strokeStyle = s.messageColor;
+      ctx.lineWidth = 2;
+      rr(bubbleX, bubbleY, maxBubbleW, bubbleH, 12, false, true);
+
+      // نقطه‌ی اتصال (مثلث) بالای حباب به سمت Sahra
+      var tipX = Math.min(Math.max(x, bubbleX + 20), bubbleX + maxBubbleW - 20);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.moveTo(tipX - 6, bubbleY);
+      ctx.lineTo(tipX + 6, bubbleY);
+      ctx.lineTo(tipX, bubbleY - 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = s.messageColor;
+      ctx.beginPath();
+      ctx.moveTo(tipX - 6, bubbleY);
+      ctx.lineTo(tipX, bubbleY - 8);
+      ctx.lineTo(tipX + 6, bubbleY);
+      ctx.stroke();
+
+      // متن
+      ctx.fillStyle = s.messageColor;
+      ctx.textBaseline = "middle";
+      for (var lj = 0; lj < lines.length; lj++) {
+        ctx.fillText(lines[lj], bubbleX + maxBubbleW / 2, bubbleY + 12 + lj * 20);
+      }
+      ctx.textBaseline = "alphabetic";
+    }
+
+    // ذرات جادویی (sparkles)
+    if (s.phase % 0.3 < 0.1 && Math.random() < 0.3) {
+      state.particles.push({
+        x: x + (Math.random() - 0.5) * 25, y: y + (Math.random() - 0.5) * 25,
+        vx: (Math.random() - 0.5) * 0.5, vy: -Math.random() * 0.8,
+        life: 30, maxLife: 30,
+        color: ["#9B5DE5", "#5DB8FF", "#FFD966"][Math.floor(Math.random() * 3)],
+        size: Math.random() * 2 + 1, type: "spark"
+      });
+    }
   }
 
   function drawViviana() {
@@ -2674,6 +3225,13 @@
     if (raf) cancelAnimationFrame(raf);
     document.getElementById("pauseOverlay").style.display = "flex";
     document.getElementById("csPause").textContent = "▶ Reprendre";
+    // ⏸ غیرفعال کردن دکمه‌های Sauter و Se baisser
+    document.getElementById("cs6").disabled = true;
+    document.getElementById("cs7").disabled = true;
+    document.getElementById("cs6").style.opacity = "0.4";
+    document.getElementById("cs7").style.opacity = "0.4";
+    document.getElementById("cs6").style.pointerEvents = "none";
+    document.getElementById("cs7").style.pointerEvents = "none";
   }
 
   function resumeGame() {
@@ -2682,6 +3240,13 @@
     state.running = true;
     document.getElementById("pauseOverlay").style.display = "none";
     document.getElementById("csPause").textContent = "⏸ Pause";
+    // ▶ فعال کردن دوباره
+    document.getElementById("cs6").disabled = false;
+    document.getElementById("cs7").disabled = false;
+    document.getElementById("cs6").style.opacity = "1";
+    document.getElementById("cs7").style.opacity = "1";
+    document.getElementById("cs6").style.pointerEvents = "";
+    document.getElementById("cs7").style.pointerEvents = "";
     lastTs = performance.now();
     accumulator = 0;
     if (raf) cancelAnimationFrame(raf);
