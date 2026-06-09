@@ -750,7 +750,7 @@
           <div class="rule-icon">⛔</div>
           <div class="rule-content">
             <div class="rule-label">À éviter</div>
-            <div class="rule-text">Pièges du quotidien : <em>procrastination, plagiat, burn-out, scroll infini, copier-IA…</em> <strong>−1 vie et −100 points</strong></div>
+            <div class="rule-text">Pièges du quotidien : <em>procrastination, plagiat, burn-out, scroll infini, utilisation irresponsable IAG…</em> <strong>−1 vie et −100 points</strong></div>
           </div>
         </div>
 
@@ -1137,7 +1137,7 @@
     { label: "Burn-out",          color: "#993C1D", emoji: "🔥" },
     { label: "Isolement",         color: "#A32D2D", emoji: "😶" },
     // استفاده‌ی نادرست از IA
-    { label: "Copier-IA",         color: "#A32D2D", emoji: "🤖" }
+    { label: "Utilisation irresponsable IAG", color: "#A32D2D", emoji: "🤖" }
   ];
 
   var SKY = [
@@ -1152,6 +1152,7 @@
   function reset() {
     state = {
       running: true,
+      frame: 0,  // 🕐 شمارنده‌ی فریم برای محاسبه‌ی سرعت بر اساس زمان
       player: { x: 80, y: GROUND_Y, vy: 0, w: 30, h: 46, onGround: true, jumpsLeft: 2, ducking: false, runFrame: 0, emotion: "neutral", emotionTimer: 0, hairWave: 0 },
       items: [], score: 0, concepts: 0, lives: 3,
       caughtConcepts: [], hitObstacles: [],
@@ -1169,6 +1170,7 @@
       sahraShownForItem: [],    // لیست index آیتم‌هایی که Sahra توضیح داده
       sahraShownViviana: false,
       sahraShownAlireza: false,
+      sahraShownWall: false,
       totalSpawned: 0,
       shownEnd: false
     };
@@ -1375,24 +1377,75 @@
     var y, h;
     if (isBonus) {
       h = 40;
-      // بونوس flying: متوسط بالا (پلیر باید بپره)
-      y = flying ? (GROUND_Y - 75) : GROUND_Y;
+      if (flying) {
+        // 🎈 بونوس پرنده: ارتفاع متنوع - گاهی پایین، گاهی متوسط، گاهی خیلی بالا!
+        // multi-jump فعاله، پس می‌تونه به بالاتر هم برسه
+        var heightRoll = Math.random();
+        if (heightRoll < 0.4) {
+          y = GROUND_Y - 75;   // ارتفاع کم (راحت برای پرش)
+        } else if (heightRoll < 0.75) {
+          y = GROUND_Y - 130;  // ارتفاع متوسط (نیاز به یک پرش خوب)
+        } else {
+          y = GROUND_Y - 180;  // ارتفاع بالا (نیاز به double-jump)
+        }
+      } else {
+        y = GROUND_Y;  // زمینی
+      }
     } else {
       h = 40;
-      // مانع flying: پایین (پلیر باید خم بشه)
-      y = flying ? (GROUND_Y - 26) : GROUND_Y;
-      if (flying) h = 24;  // ارتفاع کوتاه برای collision دقیق
+      // 🧱 از مرحله ۳ به بعد، دیوارها به‌مرور بیشتر می‌شن
+      // مرحله ۳: 30% / ۴: 40% / ۵: 50% / ۶: 60% / ۷: 70% / ۸+: 80%
+      var curStg = state.stage || 1;
+      var wallChance = 0;
+      if (curStg === 3) wallChance = 0.30;
+      else if (curStg === 4) wallChance = 0.40;
+      else if (curStg === 5) wallChance = 0.50;
+      else if (curStg === 6) wallChance = 0.60;
+      else if (curStg === 7) wallChance = 0.70;
+      else if (curStg >= 8) wallChance = 0.80;
+
+      var isWall = (curStg >= 3 && Math.random() < wallChance);
+      if (isWall) {
+        // 🧱 سه نوع دیوار: کامل، دو سوم، نصفه
+        // فضای زیر دیوار باید حداقل ۲۶ پیکسل بمونه (برای خم شدن)
+        // GROUND_Y - 26 = حداکثر ارتفاع کل دیوار (که از پایین تا بالای canvas میره)
+        flying = true;
+        y = GROUND_Y - 26;  // پایین دیوار (همیشه ثابت، فضای خم شدن)
+        var fullHeight = GROUND_Y - 26;
+        var wallTypeRoll = Math.random();
+        if (wallTypeRoll < 0.4) {
+          // ۴۰٪ دیوار کامل
+          h = fullHeight;
+        } else if (wallTypeRoll < 0.7) {
+          // ۳۰٪ دیوار دو سوم
+          h = Math.round(fullHeight * 0.67);
+        } else {
+          // ۳۰٪ دیوار نصفه
+          h = Math.round(fullHeight * 0.5);
+        }
+      } else {
+        // مانع flying معمولی
+        y = flying ? (GROUND_Y - 26) : GROUND_Y;
+        if (flying) h = 24;
+      }
     }
     var tw = d.label.length * 11 + 70;
     var newItem = {
       type: isBonus ? "bonus" : "obstacle",
       label: d.label, color: d.color, emoji: d.emoji,
       x: W + 20, y: y,
-      w: Math.max(110, tw), h: h,
+      w: (typeof isWall !== "undefined" && isWall) ? 110 : Math.max(110, tw), h: h,
       hit: false, flying: flying,
-      pulse: 0, bobOffset: Math.random() * Math.PI * 2
+      pulse: 0, bobOffset: Math.random() * Math.PI * 2,
+      isWall: (typeof isWall !== "undefined" ? isWall : false)
     };
     state.items.push(newItem);
+
+    // 🧱 اولین بار دیوار: Sahra توضیح بده
+    if (newItem.isWall && !state.sahraShownWall && !state.sahra && !state.viviana && !state.alireza) {
+      state.sahraShownWall = true;
+      spawnSahra("wall", newItem);
+    }
 
     // 🧚‍♀️ Sahra برای ۵ آیتم اول راهنمایی کنه (اگه قبلاً نیومده و Viviana/Alireza هم نیست)
     if (state.totalSpawned <= 5 && !state.sahra && !state.viviana && !state.alireza) {
@@ -1442,8 +1495,16 @@
     var p = state.player;
     p.vy += 0.6; p.y += p.vy;
     if (p.y >= GROUND_Y) { p.y = GROUND_Y; p.vy = 0; p.onGround = true; p.jumpsLeft = 2; }
-    // سرعت پایین برای خوانایی متن هنگام حرکت
-    state.speed = Math.round(2 + Math.min(3, state.score / 700));
+    // 🕐 شمارنده‌ی فریم - بازی روی ۶۰fps اجرا می‌شه
+    state.frame = (state.frame || 0) + 1;
+    // 📈 سیستم مرحله‌ای: هر ۳۰ ثانیه یک مرحله جدید
+    // سرعت آرام افزایش می‌یابد، حداکثر روی ۵ (مرحله ۸)
+    var stage = Math.floor(state.frame / 1800) + 1;
+    state.stage = stage;
+    // 🎯 سرعت: هر ۲ مرحله، ۱ واحد افزایش
+    // مرحله ۱-۲: speed 2 / مرحله ۳-۴: speed 3 / مرحله ۵-۶: speed 4 / مرحله ۷-۸+: speed 5 (سقف)
+    var speedStage = Math.floor((Math.min(state.stage, 8) - 1) / 2);  // 0, 1, 2, 3
+    state.speed = 2 + speedStage;  // 2, 3, 4, 5
     p.runFrame += state.speed * 0.06; p.hairWave += 0.15;
     state.timePhase = (state.score / 200) % 4;
     if (state.timePhase < 0) state.timePhase += 4;
@@ -1452,27 +1513,55 @@
     var skyEntry = SKY[skyIdx];
     if (skyEntry) document.getElementById("cs4").textContent = skyEntry.emoji;
     // Niveau: هر ۳۰۰ امتیاز یه لول جدید
-    var lvl = Math.floor(state.score / 300) + 1;
+    // 📊 نمایش مرحله در HUD - بر اساس زمان نه امتیاز
     var lvlEl = document.getElementById("csLevel");
-    if (lvlEl) lvlEl.textContent = lvl;
+    if (lvlEl) lvlEl.textContent = state.stage || 1;
+    // 🎉 پیام level up
+    if (state.stage > (state.lastStage || 1)) {
+      state.lastStage = state.stage;
+      // popup در وسط صفحه
+      state.popups.push({
+        x: W / 2, y: H / 2 - 50,
+        txt: "🎯 Niveau " + state.stage + " !",
+        color: "#FFD966",
+        life: 90, big: true
+      });
+    }
 
     state.spawnCd--;
     if (state.spawnCd <= 0) {
       // 📚 برای ۳ آیتم اول: اگه Sahra هنوز حرف می‌زنه، صبر کن
       if (state.totalSpawned < 3 && state.sahra) {
-        // wait - cooldown رو بذار روی یه عدد کوچک تا فریم بعد دوباره چک کنه
         state.spawnCd = 10;
       } else {
         spawn();
-        // 📚 برای ۳ آیتم اول فاصله‌ی بیشتر تا Sahra فرصت توضیح داشته باشه
         var spawnGap;
         if (state.totalSpawned <= 3) {
-          spawnGap = 280;  // ~۴.۷ ثانیه فاصله
+          spawnGap = 280;  // ~۴.۷ ثانیه برای آموزشی
         } else {
-          // بقیه: شروع ~۱۸۰ فریم، با امتیاز کم‌تر می‌شه
-          spawnGap = Math.max(60, 180 - state.score / 30);
+          // 📊 spawnGap بر اساس مرحله (نه امتیاز)
+          // مرحله ۱: 200 / ۲: 180 / ۳: 160 / ۴: 145 / ۵: 130 / ۶+: 120
+          var stg = state.stage || 1;
+          spawnGap = Math.max(120, 220 - stg * 18);
         }
-        state.spawnCd = spawnGap + Math.floor(Math.random() * 40);
+        // 🔒 تضمین حداقل فاصله بر اساس عرض آیتم آخر + buffer
+        // اگه آیتم قبلی هنوز خیلی نزدیک ـه، spawn رو عقب بنداز
+        var lastItem = null;
+        for (var li = state.items.length - 1; li >= 0; li--) {
+          if (!state.items[li].fromAlireza) { lastItem = state.items[li]; break; }
+        }
+        if (lastItem) {
+          // فاصله‌ی فعلی آیتم آخر تا spawn point (W+20)
+          var distToLast = (W + 20) - (lastItem.x + lastItem.w);
+          // می‌خواهیم حداقل ۲۰۰ پیکسل فاصله بمونه
+          var minGapPixels = 200;
+          if (distToLast < minGapPixels) {
+            // تعداد فریم برای رسیدن به فاصله‌ی کافی
+            var framesToWait = Math.ceil((minGapPixels - distToLast) / Math.max(1, state.speed));
+            spawnGap = Math.max(spawnGap, framesToWait + 5);
+          }
+        }
+        state.spawnCd = spawnGap + Math.floor(Math.random() * 30);
       }
     }
 
@@ -1640,8 +1729,15 @@
     if (!state.alireza && !state.viviana && !state.sahra) {
       state.alirezaCooldown--;
       if (state.alirezaCooldown <= 0) {
-        // احتمال ظهور با امتیاز بیشتر می‌شه: ۳۰٪ → ۷۰٪
-        var alirezaChance = Math.min(0.7, 0.30 + state.score / 3000);
+        // 📈 احتمال و فرکانس Alireza با مرحله بیشتر می‌شه
+        // مرحله ۱: 25% / cooldown 900
+        // مرحله ۲: 35% / cooldown 700
+        // مرحله ۳: 50% / cooldown 550
+        // مرحله ۴: 65% / cooldown 420
+        // مرحله ۵: 80% / cooldown 320
+        // مرحله ۶: 90% / cooldown 250
+        var stg = state.stage || 1;
+        var alirezaChance = Math.min(0.9, 0.15 + stg * 0.13);
         if (Math.random() < alirezaChance) {
           // 🚨 اولین بار Alireza: Sahra اول هشدار بده، بعد Alireza بیاد
           if (!state.sahraShownAlireza) {
@@ -1659,9 +1755,9 @@
               evilItem: null,
               deliverTimer: 0
             };
-            // cooldown کوتاه‌تر با امتیاز: از ۹۰۰ به ۴۰۰
-            var alirezaCd = Math.max(400, 900 - state.score / 5);
-            state.alirezaCooldown = alirezaCd + Math.floor(Math.random() * 400);
+            // 📉 cooldown با مرحله کمتر می‌شه: stage 1 → 900، stage 6 → 250
+            var alirezaCd = Math.max(250, 1100 - stg * 140);
+            state.alirezaCooldown = alirezaCd + Math.floor(Math.random() * 300);
           }
         } else {
           state.alirezaCooldown = 200;
@@ -1693,9 +1789,10 @@
           a.evilItem.x = a.x;
           a.evilItem.y = a.y + 15;
         }
-        // در فریم ۲۵، مانع رو دقیقاً جلوی پلیر می‌اندازه
+        // در فریم ۲۵، یک مانع تکی می‌اندازه
         if (a.deliverTimer === 25 && a.evilItem) {
           var ev = a.evilItem;
+          // مانع تکی - فقط single
           var tw = ev.label.length * 11 + 70;
           var flying = Math.random() < 0.3;
           var spawnY = flying ? (GROUND_Y - 26) : GROUND_Y;
@@ -1703,20 +1800,20 @@
           state.items.push({
             type: "obstacle",
             label: ev.label, color: ev.color, emoji: ev.emoji,
-            x: a.x,    // ✅ دقیقاً جای فعلی Alireza (جلوی پلیر)
+            x: a.x,
             y: spawnY,
             w: Math.max(110, tw), h: spawnH,
             hit: false, flying: flying,
             pulse: 0, bobOffset: Math.random() * Math.PI * 2,
             fromAlireza: true
           });
-          // افکت ذرات قرمز
           for (var asi = 0; asi < 15; asi++) {
             var aang = Math.random() * Math.PI * 2;
             var aSp = Math.random() * 3 + 1;
             state.particles.push({ x: a.x, y: a.y + 15, vx: Math.cos(aang) * aSp, vy: Math.sin(aang) * aSp - 1, life: 30, maxLife: 30, color: "#A32D2D", size: Math.random() * 3 + 2, type: "smoke" });
           }
           state.popups.push({ x: a.x, y: a.y - 35, txt: "😈 Bon courage !", color: "#A32D2D", life: 70 });
+
           a.evilItem = null;
           a.mode = "retreat";
         }
@@ -1790,7 +1887,10 @@
     state.particles = state.particles.filter(function(pt) { return pt.life > 0; });
 
     for (var popi = 0; popi < state.popups.length; popi++) {
-      var pop = state.popups[popi]; pop.x -= state.speed; pop.y -= 1; pop.life--;
+      var pop = state.popups[popi];
+      // popup های بزرگ (Level up) ثابت می‌مونن، فقط رنگ‌شون محو می‌شه
+      if (!pop.big) pop.x -= state.speed;
+      pop.y -= 1; pop.life--;
     }
     state.popups = state.popups.filter(function(p) { return p.life > 0; });
 
@@ -1910,8 +2010,15 @@
     for (var ppi = 0; ppi < state.popups.length; ppi++) {
       var pop = state.popups[ppi];
       ctx.globalAlpha = Math.min(1, pop.life / 35);
-      ctx.strokeStyle = "white"; ctx.lineWidth = 3;
-      ctx.font = "bold 18px sans-serif"; ctx.textAlign = "center";
+      ctx.strokeStyle = "white";
+      if (pop.big) {
+        ctx.font = "bold 32px Fredoka, sans-serif";
+        ctx.lineWidth = 5;
+      } else {
+        ctx.font = "bold 18px sans-serif";
+        ctx.lineWidth = 3;
+      }
+      ctx.textAlign = "center";
       ctx.strokeText(pop.txt, pop.x, pop.y);
       ctx.fillStyle = pop.color; ctx.fillText(pop.txt, pop.x, pop.y);
       ctx.globalAlpha = 1;
@@ -1987,6 +2094,10 @@
       state.sahra.message = "😈 Attention à Alireza ! Évitez son piège !";
       state.sahra.messageColor = "#A32D2D";
       state.sahra.duration = 160;
+    } else if (context === "wall") {
+      state.sahra.message = "🧱 Un mur ! Baissez-vous pour passer dessous !";
+      state.sahra.messageColor = "#A32D2D";
+      state.sahra.duration = 180;
     }
   }
 
@@ -3125,6 +3236,61 @@
   function drawItem(it) {
     var x = Math.round(it.x), y = Math.round(it.y);
     var w = Math.round(it.w), h = Math.round(it.h);
+
+    // 🧱 رندر مخصوص دیوار
+    if (it.isWall) {
+      // y = پایین، h = ارتفاع، پس از (x, y-h) به (x+w, y) رندر می‌کنیم
+      var wallTop = y - h;
+      // پس‌زمینه‌ی قرمز تیره با gradient
+      var wallGrad = ctx.createLinearGradient(x, 0, x + w, 0);
+      wallGrad.addColorStop(0, "#8B1F1F");
+      wallGrad.addColorStop(0.5, "#A32D2D");
+      wallGrad.addColorStop(1, "#8B1F1F");
+      ctx.fillStyle = wallGrad;
+      rr(x, wallTop, w, h, 4, true, false);
+      // border قرمز روشن
+      ctx.strokeStyle = "#D44949";
+      ctx.lineWidth = 2;
+      rr(x, wallTop, w, h, 4, false, true);
+      // الگوی آجری
+      ctx.strokeStyle = "rgba(0,0,0,0.25)";
+      ctx.lineWidth = 1;
+      for (var bj = 0; bj < h; bj += 22) {
+        ctx.beginPath();
+        ctx.moveTo(x, wallTop + bj);
+        ctx.lineTo(x + w, wallTop + bj);
+        ctx.stroke();
+        // آجرهای offset
+        var offset = (bj / 22) % 2 === 0 ? 0 : w / 2;
+        ctx.beginPath();
+        ctx.moveTo(x + offset, wallTop + bj);
+        ctx.lineTo(x + offset, wallTop + bj + 22);
+        ctx.stroke();
+      }
+      // emoji + label در وسط ارتفاع
+      var midY = wallTop + h / 2;
+      // باکس برای متن
+      ctx.font = "bold 14px Inter, sans-serif";
+      var labelW = ctx.measureText(it.label).width + 60;
+      var boxX = x + w / 2 - labelW / 2;
+      ctx.fillStyle = "rgba(255,255,255,0.97)";
+      ctx.fillRect(boxX, midY - 18, labelW, 36);
+      ctx.strokeStyle = "#5C0F0F";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(boxX, midY - 18, labelW, 36);
+      // emoji
+      ctx.font = "20px sans-serif";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#A32D2D";
+      ctx.fillText(it.emoji, boxX + 8, midY);
+      // label
+      ctx.font = "bold 14px Inter, sans-serif";
+      ctx.fillStyle = "#A32D2D";
+      ctx.fillText(it.label, boxX + 36, midY);
+      ctx.textBaseline = "alphabetic";
+      return;
+    }
 
     // سایه روی زمین (نه روی sprite، چون فاصله‌ش از آیتم متفاوته)
     if (!it.flying) {
