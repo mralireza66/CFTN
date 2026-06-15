@@ -3563,11 +3563,18 @@
 
   // EVENT LISTENERS
   document.addEventListener("keydown", function(e) {
+    // 🎯 اگه کاربر داره توی یه input/textarea تایپ می‌کنه، میانبرهای بازی رو نادیده بگیر
+    var tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+    if (tag === "input" || tag === "textarea") return;
     if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); jump(); }
     if (e.code === "ArrowDown") { e.preventDefault(); duck(true); }
     if (e.code === "Escape" || e.code === "KeyP") { e.preventDefault(); togglePause(); }
   });
-  document.addEventListener("keyup", function(e) { if (e.code === "ArrowDown") duck(false); });
+  document.addEventListener("keyup", function(e) {
+    var tag2 = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+    if (tag2 === "input" || tag2 === "textarea") return;
+    if (e.code === "ArrowDown") duck(false);
+  });
 
   // 🎯 دکمه‌ی Sauter - touchstart مستقیم برای واکنش سریع و امکان tap های پشت سر هم
   var jumpBtn = document.getElementById("cs6");
