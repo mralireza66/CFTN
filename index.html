@@ -976,7 +976,8 @@
       </div>
     </div>
     <!-- ⚰️ Game Over overlay - مودال تمام‌صفحه (fixed نسبت به viewport) -->
-    <div id="gameOverOverlay" style="position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(135deg, rgba(15,15,35,0.97) 0%, rgba(60,30,80,0.97) 100%); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-align: center; padding: 20px 16px; box-sizing: border-box; animation: fadeIn 0.4s ease; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+    <div id="gameOverOverlay" style="position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: flex-start; flex-direction: column; background: linear-gradient(135deg, rgba(15,15,35,0.97) 0%, rgba(60,30,80,0.97) 100%); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-align: center; padding: 24px 16px; box-sizing: border-box; animation: fadeIn 0.4s ease; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+      <div style="margin: auto 0; display: flex; flex-direction: column; align-items: center; width: 100%;">
       <div id="gameOverIcon" style="font-size: 48px; line-height: 1; margin-bottom: 4px; animation: bounce 1.5s ease-in-out infinite;">🎮</div>
       <div style="font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: white; letter-spacing: 1px; text-shadow: 0 4px 16px rgba(0,0,0,0.5);">Game Over</div>
       <div id="gameOverRank" style="font-family: 'Fredoka', sans-serif; font-size: 15px; color: #FFD966; font-weight: 600; margin-bottom: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.4);">—</div>
@@ -1015,6 +1016,7 @@
       </div>
 
       <button id="gameOverRestartBtn" type="button" style="padding: 14px 36px; font-family: 'Fredoka', sans-serif; font-size: 17px; font-weight: 600; background: linear-gradient(135deg, #1D9E75 0%, #2BB888 100%); color: white; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 8px 24px rgba(29,158,117,0.5); letter-spacing: 0.5px; margin-top: 4px;">🔄 Rejouer</button>
+      </div>
     </div>
   </div>
 
