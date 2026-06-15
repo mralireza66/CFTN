@@ -357,28 +357,40 @@
   /* HUD آمار - glassmorphism مدرن */
   .stats {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 10px;
     margin-bottom: 14px;
   }
   .stat {
-    background: rgba(255,255,255,0.55);
+    background: linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.48) 100%);
     border-radius: 18px;
     padding: 12px 8px;
     text-align: center;
     box-shadow:
       0 8px 24px rgba(0,0,0,0.1),
-      inset 0 1px 0 rgba(255,255,255,0.7);
+      0 2px 4px rgba(0,0,0,0.05),
+      inset 0 1px 0 rgba(255,255,255,0.85);
     backdrop-filter: blur(20px) saturate(1.5);
     -webkit-backdrop-filter: blur(20px) saturate(1.5);
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.65);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  /* خط رنگی ظریف بالای هر کارت */
+  .stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 2.5px;
+    border-radius: 0 0 3px 3px;
+    background: linear-gradient(90deg, transparent, rgba(24,95,165,0.45), transparent);
   }
   .stat:hover {
     transform: translateY(-2px);
     box-shadow:
       0 12px 28px rgba(0,0,0,0.15),
-      inset 0 1px 0 rgba(255,255,255,0.8);
+      inset 0 1px 0 rgba(255,255,255,0.9);
   }
   .stat-label {
     font-size: 10px;
@@ -391,7 +403,10 @@
   .stat-value {
     font-size: 20px;
     font-weight: 700;
-    color: #185FA5;
+    background: linear-gradient(135deg, #185FA5 0%, #3D7FC4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-family: 'Fredoka', sans-serif;
     margin-top: 3px;
     letter-spacing: -0.3px;
@@ -497,23 +512,38 @@
     font-weight: 600;
     cursor: pointer;
     border: none;
-    background: rgba(255,255,255,0.6);
+    background: linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.55) 100%);
     border-radius: 16px;
     color: #185FA5;
     box-shadow:
-      0 8px 20px rgba(0,0,0,0.1),
-      inset 0 1px 0 rgba(255,255,255,0.7);
-    transition: all 0.2s ease;
+      0 8px 20px rgba(0,0,0,0.12),
+      0 2px 4px rgba(0,0,0,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     backdrop-filter: blur(15px);
-    border: 1px solid rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.6);
     letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+  }
+  /* نوار رنگی پایین هر دکمه */
+  .controls button::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 15%; right: 15%;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(90deg, #5DB8FF, #185FA5);
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
   }
   .controls button:hover {
-    background: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.92);
     transform: translateY(-3px);
-    box-shadow: 0 14px 28px rgba(0,0,0,0.15);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.16);
   }
-  .controls button:active { transform: translateY(0) scale(0.97); }
+  .controls button:hover::after { opacity: 1; }
+  .controls button:active { transform: translateY(0) scale(0.96); }
 
   /* صفحه‌ی پایان */
   #share {
@@ -616,7 +646,7 @@
     .container { max-width: 100%; }
     h1 { font-size: 30px; }
     .name-title { font-size: 28px; }
-    .stats { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .stats { grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .stat { padding: 8px 4px; }
     .stat-label { font-size: 9px; letter-spacing: 0.4px; }
     .stat-value { font-size: 16px; }
@@ -657,8 +687,6 @@
     .stat { padding: 7px 3px; border-radius: 12px; }
     .stat-label { font-size: 8px; }
     .stat-value { font-size: 14px; }
-    /* "Niveau" رو روی موبایل حذف کن چون فضا کمه */
-    .stat:nth-child(4) { display: none; }
     #missionBox, #controlsHelp { font-size: 11px; padding: 10px 12px; border-radius: 12px; }
     canvas { border-radius: 14px; border-width: 2px; max-width: 100%; }
     /* روی موبایل، اطمینان از اینکه canvas از container خارج نشه */
@@ -690,7 +718,8 @@
     h1 { font-size: 22px; }
     .name-title { font-size: 21px; }
     .stats { grid-template-columns: repeat(3, 1fr); }
-    .stat:nth-child(4), .stat:nth-child(5) { display: none; }
+    /* روی صفحه‌ی خیلی کوچیک: Score, Vies, Niveau بمونن. Joueur حذف */
+    .stat:nth-child(1) { display: none; }
     .controls button { font-size: 11px; padding: 10px 4px; }
   }
 </style>
@@ -924,7 +953,6 @@
     <div class="stat"><div class="stat-label">Score</div><div class="stat-value" id="cs1">0</div></div>
     <div class="stat"><div class="stat-label">♥ Vies</div><div class="stat-value" id="cs3">♥♥♥</div></div>
     <div class="stat"><div class="stat-label">Niveau</div><div class="stat-value" id="csLevel">1</div></div>
-    <div class="stat"><div class="stat-label">Heure</div><div class="stat-value" id="cs4">🌅</div></div>
   </div>
 
   <div id="missionBox">
@@ -947,40 +975,46 @@
         <button id="restartFromPauseBtn" type="button" style="padding: 12px 24px; font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 600; background: rgba(255,255,255,0.95); color: #185FA5; border: 2px solid white; border-radius: 12px; cursor: pointer;">🔄 Recommencer</button>
       </div>
     </div>
-    <!-- ⚰️ Game Over overlay - روی canvas نمایش داده می‌شه -->
-    <div id="gameOverOverlay" style="position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(135deg, rgba(15,15,35,0.95) 0%, rgba(60,30,80,0.95) 100%); border-radius: 18px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); text-align: center; padding: 10px 14px; box-sizing: border-box; animation: fadeIn 0.5s ease;">
-      <div id="gameOverIcon" style="font-size: 36px; line-height: 1; margin-bottom: 2px; animation: bounce 1.5s ease-in-out infinite;">🎮</div>
-      <div style="font-family: 'Fredoka', sans-serif; font-size: 20px; font-weight: 700; color: white; letter-spacing: 1px; text-shadow: 0 4px 16px rgba(0,0,0,0.5);">Game Over</div>
-      <div id="gameOverRank" style="font-family: 'Fredoka', sans-serif; font-size: 13px; color: #FFD966; font-weight: 600; margin-bottom: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.4);">—</div>
-      <div style="display: flex; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; justify-content: center;">
-        <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 8px;">
-          <div style="font-size: 8px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Score</div>
-          <div id="gameOverScore" style="font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 700; color: white; line-height: 1.1;">0</div>
+    <!-- ⚰️ Game Over overlay - مودال تمام‌صفحه (fixed نسبت به viewport) -->
+    <div id="gameOverOverlay" style="position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(135deg, rgba(15,15,35,0.97) 0%, rgba(60,30,80,0.97) 100%); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-align: center; padding: 20px 16px; box-sizing: border-box; animation: fadeIn 0.4s ease; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+      <div id="gameOverIcon" style="font-size: 48px; line-height: 1; margin-bottom: 4px; animation: bounce 1.5s ease-in-out infinite;">🎮</div>
+      <div style="font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: white; letter-spacing: 1px; text-shadow: 0 4px 16px rgba(0,0,0,0.5);">Game Over</div>
+      <div id="gameOverRank" style="font-family: 'Fredoka', sans-serif; font-size: 15px; color: #FFD966; font-weight: 600; margin-bottom: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.4);">—</div>
+      <div style="display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center;">
+        <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 12px;">
+          <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Score</div>
+          <div id="gameOverScore" style="font-family: 'Fredoka', sans-serif; font-size: 26px; font-weight: 700; color: white; line-height: 1.1;">0</div>
         </div>
-        <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 8px;">
-          <div style="font-size: 8px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Concepts</div>
-          <div id="gameOverConcepts" style="font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 700; color: white; line-height: 1.1;">0</div>
+        <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 12px;">
+          <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Concepts</div>
+          <div id="gameOverConcepts" style="font-family: 'Fredoka', sans-serif; font-size: 26px; font-weight: 700; color: white; line-height: 1.1;">0</div>
         </div>
-        <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 8px;">
-          <div style="font-size: 8px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Classement</div>
-          <div id="gameOverRankNum" style="font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 700; color: #FFD966; line-height: 1.1;">—</div>
+        <div style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 12px;">
+          <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Classement</div>
+          <div id="gameOverRankNum" style="font-family: 'Fredoka', sans-serif; font-size: 26px; font-weight: 700; color: #FFD966; line-height: 1.1;">—</div>
         </div>
       </div>
 
       <!-- 🎉 پیام تبریک + مفاهیم گرفته شده + موانعی که باید دوری شه -->
-      <div id="gameOverDetails" style="width: 100%; max-width: 480px; margin: 2px auto 6px;">
-        <div id="gameOverBravo" style="font-family: 'Fredoka', sans-serif; font-size: 11.5px; color: white; margin-bottom: 4px; font-weight: 500; text-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+      <div id="gameOverDetails" style="width: 100%; max-width: 480px; margin: 0 auto 14px;">
+        <div id="gameOverBravo" style="font-family: 'Fredoka', sans-serif; font-size: 14px; color: white; margin-bottom: 10px; font-weight: 500; text-shadow: 0 2px 6px rgba(0,0,0,0.3);">
           Bravo ! Vous avez réussi à progresser dans cette aventure.
         </div>
-        <div id="gameOverCaught" style="display: none; background: linear-gradient(135deg, rgba(180,230,160,0.25) 0%, rgba(234,243,222,0.2) 100%); border: 1px solid rgba(180,230,160,0.5); border-radius: 7px; padding: 5px 9px; font-size: 10px; color: white; margin-bottom: 4px; text-align: left; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word;">
+        <div id="gameOverCaught" style="display: none; background: linear-gradient(135deg, rgba(180,230,160,0.25) 0%, rgba(234,243,222,0.2) 100%); border: 1px solid rgba(180,230,160,0.5); border-radius: 10px; padding: 9px 13px; font-size: 12px; color: white; margin-bottom: 8px; text-align: left; line-height: 1.5; word-wrap: break-word; overflow-wrap: break-word;">
           <strong style="color: #B5F0A8;">✅ Concepts attrapés :</strong> <span id="caughtList"></span>
         </div>
-        <div id="gameOverAvoid" style="display: none; background: linear-gradient(135deg, rgba(255,180,180,0.25) 0%, rgba(252,235,235,0.2) 100%); border: 1px solid rgba(255,180,180,0.5); border-radius: 7px; padding: 5px 9px; font-size: 10px; color: white; text-align: left; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word;">
+        <div id="gameOverAvoid" style="display: none; background: linear-gradient(135deg, rgba(255,180,180,0.25) 0%, rgba(252,235,235,0.2) 100%); border: 1px solid rgba(255,180,180,0.5); border-radius: 10px; padding: 9px 13px; font-size: 12px; color: white; text-align: left; line-height: 1.5; word-wrap: break-word; overflow-wrap: break-word;">
           <strong style="color: #FFB5B5;">⛔ À éviter la prochaine fois :</strong> <span id="avoidList"></span>
         </div>
       </div>
 
-      <button id="gameOverRestartBtn" type="button" style="padding: 9px 22px; font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; background: linear-gradient(135deg, #1D9E75 0%, #2BB888 100%); color: white; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 18px rgba(29,158,117,0.5); letter-spacing: 0.5px; margin-top: 2px;">🔄 Rejouer</button>
+      <!-- 🏆 جدول امتیازات داخل مودال -->
+      <div id="gameOverLeaderboard" style="width: 100%; max-width: 480px; margin: 0 auto 14px; background: rgba(255,255,255,0.97); border-radius: 14px; padding: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);">
+        <div style="font-family: 'Fredoka', sans-serif; font-weight: 700; margin-bottom: 10px; font-size: 16px; color: #185FA5; text-align: center;">🏆 Top 10 — Classement</div>
+        <div id="gameOverLeaderboardList"></div>
+      </div>
+
+      <button id="gameOverRestartBtn" type="button" style="padding: 14px 36px; font-family: 'Fredoka', sans-serif; font-size: 17px; font-weight: 600; background: linear-gradient(135deg, #1D9E75 0%, #2BB888 100%); color: white; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 8px 24px rgba(29,158,117,0.5); letter-spacing: 0.5px; margin-top: 4px;">🔄 Rejouer</button>
     </div>
   </div>
 
@@ -1178,6 +1212,7 @@
     document.getElementById("share").style.display = "none";
     var lb = document.getElementById("leaderboard"); if (lb) lb.style.display = "none";
     var gov = document.getElementById("gameOverOverlay"); if (gov) gov.classList.remove("visible");
+    document.body.style.overflow = "";  // باز کردن scroll پس‌زمینه
     // ⏸ پنهان کردن pause overlay و برگرداندن متن دکمه
     var pov = document.getElementById("pauseOverlay"); if (pov) pov.style.display = "none";
     var pBtn = document.getElementById("csPause"); if (pBtn) pBtn.textContent = "⏸ Pause";
@@ -1191,6 +1226,7 @@
     }
     // ⚡ بعد از پنهان شدن overlay، اندازه canvas رو دوباره چک کن
     setupCanvasHiDPI();
+    hud();  // 💗 نمایش اولیه‌ی HUD (۳ قلب، score 0، niveau 1)
     lastTs = performance.now();
     accumulator = 0;
     if (raf) cancelAnimationFrame(raf);
@@ -1264,6 +1300,7 @@
       bravoEl.textContent = "Belle tentative ! Vous progresserez encore plus la prochaine fois. 💪";
     }
     document.getElementById("gameOverOverlay").classList.add("visible");
+    document.body.style.overflow = "hidden";  // قفل scroll پس‌زمینه
 
     document.getElementById("shareTitle").innerHTML = icon + " " + rank + "<br><span style='font-weight: 400; font-size: 14px;'>" + escapeHtml(playerName) + " · Score : " + fs + " · " + state.concepts + " concept" + (state.concepts > 1 ? "s" : "") + " attrapé" + (state.concepts > 1 ? "s" : "") + "</span>" + rankText;
     document.getElementById("shareText").textContent = "🏃 " + playerName + " a relevé le défi #CFTNRunner !\n\nScore : " + fs + " points\nConcepts attrapés : " + state.concepts + "\nNiveau : " + rank + (myRank > 0 && myRank <= 10 ? "\nClassement : #" + myRank + " du Top 10" : "") + "\n\nÀ votre tour de jouer ! 🥨\n👉 https://mralireza66.github.io/CFTN/\n\nUn petit jeu pour découvrir le Master CFTN de l'Université de Strasbourg.\n\n#MasterCFTN #IngénieriePédagogique #Unistra #Strasbourg #INSPE #LearningDesign";
@@ -1272,10 +1309,13 @@
     // نمایش leaderboard (با scores کش‌شده فوراً)
     document.getElementById("leaderboard").style.display = "block";
     renderLeaderboard(document.getElementById("leaderboardList"), playerName);
+    // 🏆 همون leaderboard رو داخل مودال Game Over هم نشون بده
+    renderLeaderboard(document.getElementById("gameOverLeaderboardList"), playerName);
     // 🌐 بعد از ۱.۵ ثانیه دوباره fetch کن تا score های دیگه‌ی همزمان رو بگیریم
     setTimeout(function() {
       fetchGlobalScores(function() {
         renderLeaderboard(document.getElementById("leaderboardList"), playerName);
+        renderLeaderboard(document.getElementById("gameOverLeaderboardList"), playerName);
       });
     }, 1500);
 
@@ -1508,12 +1548,8 @@
     p.runFrame += state.speed * 0.06; p.hairWave += 0.15;
     state.timePhase = (state.score / 200) % 4;
     if (state.timePhase < 0) state.timePhase += 4;
-    var skyIdx = Math.floor(state.timePhase) % 4;
-    if (skyIdx < 0) skyIdx = 0;
-    var skyEntry = SKY[skyIdx];
-    if (skyEntry) document.getElementById("cs4").textContent = skyEntry.emoji;
-    // Niveau: هر ۳۰۰ امتیاز یه لول جدید
-    // 📊 نمایش مرحله در HUD - بر اساس زمان نه امتیاز
+    // (نمایش emoji شب/روز در HUD حذف شد - پس‌زمینه‌ی بازی همچنان شب/روز می‌شه via pal())
+    // Niveau: نمایش مرحله در HUD بر اساس زمان
     var lvlEl = document.getElementById("csLevel");
     if (lvlEl) lvlEl.textContent = state.stage || 1;
     // 🎉 پیام level up
@@ -1844,9 +1880,20 @@
           }
           state.flash = 8; state.flashColor = "rgba(29, 158, 117, 0.18)";
           state.popups.push({ x: it.x + it.w/2, y: it.y - 45, txt: "+50", color: "#0F6E56", life: 50 });
+          // 💫 انفجار ذرات رنگی + طلایی + سفید
           for (var pi = 0; pi < 18; pi++) {
             var ang = (pi / 18) * Math.PI * 2; var sp = Math.random() * 4 + 2;
             state.particles.push({ x: it.x + it.w/2, y: it.y - it.h/2, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 1, life: 35, maxLife: 35, color: it.color, size: Math.random() * 4 + 2, type: "spark" });
+          }
+          // ذرات طلایی درخشان
+          for (var pgi = 0; pgi < 8; pgi++) {
+            var ga = Math.random() * Math.PI * 2; var gs = Math.random() * 3 + 1.5;
+            state.particles.push({ x: it.x + it.w/2, y: it.y - it.h/2, vx: Math.cos(ga) * gs, vy: Math.sin(ga) * gs - 2, life: 45, maxLife: 45, color: "#FFD966", size: Math.random() * 3 + 1.5, type: "spark" });
+          }
+          // فلش‌های سفید کوچک
+          for (var pwi = 0; pwi < 5; pwi++) {
+            var wa = Math.random() * Math.PI * 2;
+            state.particles.push({ x: it.x + it.w/2, y: it.y - it.h/2, vx: Math.cos(wa) * 5, vy: Math.sin(wa) * 5 - 1, life: 20, maxLife: 20, color: "#FFFFFF", size: Math.random() * 2.5 + 1, type: "spark" });
           }
           p.emotion = "happy"; p.emotionTimer = 30;
         } else {
@@ -1947,14 +1994,50 @@
     if (P.isNight) {
       for (var si = 0; si < state.stars.length; si++) {
         var s = state.stars[si]; s.twinkle += 0.05;
-        ctx.fillStyle = "rgba(255,255,255," + (0.5 + Math.sin(s.twinkle) * 0.4) + ")";
+        var tw = 0.5 + Math.sin(s.twinkle) * 0.4;
+        ctx.fillStyle = "rgba(255,255,255," + tw + ")";
         ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2); ctx.fill();
+        // درخشش ستاره‌های بزرگ
+        if (s.size > 1.4) {
+          ctx.fillStyle = "rgba(255,255,255," + (tw * 0.25) + ")";
+          ctx.beginPath(); ctx.arc(s.x, s.y, s.size * 2.6, 0, Math.PI * 2); ctx.fill();
+        }
       }
     }
 
+    // ☀️ خورشید/ماه با glow نرم چندلایه
     var sy = P.sunY * GROUND_Y, sx = W * 0.82;
-    ctx.fillStyle = P.sun;
+    var glowR = P.isNight ? 60 : 95;
+    var sunGlow = ctx.createRadialGradient(sx, sy, 5, sx, sy, glowR);
+    if (P.isNight) {
+      sunGlow.addColorStop(0, "rgba(245,245,220,0.5)");
+      sunGlow.addColorStop(0.5, "rgba(245,245,220,0.12)");
+      sunGlow.addColorStop(1, "rgba(245,245,220,0)");
+    } else {
+      sunGlow.addColorStop(0, "rgba(255,235,150,0.75)");
+      sunGlow.addColorStop(0.45, "rgba(255,215,120,0.22)");
+      sunGlow.addColorStop(1, "rgba(255,200,100,0)");
+    }
+    ctx.fillStyle = sunGlow;
+    ctx.beginPath(); ctx.arc(sx, sy, glowR, 0, Math.PI * 2); ctx.fill();
+    // بدنه‌ی خورشید/ماه با gradient داخلی
+    var sunBody = ctx.createRadialGradient(sx - 7, sy - 7, 3, sx, sy, 26);
+    if (P.isNight) {
+      sunBody.addColorStop(0, "#FFFFF5");
+      sunBody.addColorStop(1, "#D9D9C0");
+    } else {
+      sunBody.addColorStop(0, "#FFF4C2");
+      sunBody.addColorStop(1, P.sun);
+    }
+    ctx.fillStyle = sunBody;
     ctx.beginPath(); ctx.arc(sx, sy, 26, 0, Math.PI * 2); ctx.fill();
+    // دهانه‌های ماه
+    if (P.isNight) {
+      ctx.fillStyle = "rgba(180,180,160,0.4)";
+      ctx.beginPath(); ctx.arc(sx - 8, sy - 4, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(sx + 7, sy + 8, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(sx + 4, sy - 10, 2.5, 0, Math.PI * 2); ctx.fill();
+    }
 
     ctx.fillStyle = P.isNight ? "rgba(60,70,100,0.7)" : "rgba(255,255,255,0.9)";
     for (var ic = 0; ic < 5; ic++) {
@@ -1970,6 +2053,14 @@
       var bx = ((ih * 130 - state.midOffset) % (W + 260)) - 130;
       house(bx, P, ih);
     }
+    // 🌫️ مه افق - عمق اتمسفری بین لایه‌ی دور و نزدیک
+    var haze = ctx.createLinearGradient(0, GROUND_Y - 90, 0, GROUND_Y);
+    var hazeColor = P.isNight ? "20,35,60" : "255,245,230";
+    haze.addColorStop(0, "rgba(" + hazeColor + ",0)");
+    haze.addColorStop(1, "rgba(" + hazeColor + ",0.28)");
+    ctx.fillStyle = haze;
+    ctx.fillRect(0, GROUND_Y - 90, W, 90);
+
     for (var inh = 0; inh < 6; inh++) {
       var nx = ((inh * 180 - state.nearOffset) % (W + 360)) - 180;
       if (inh % 3 === 2) tree(nx + 90, P); else smallHouse(nx, P, inh);
@@ -1978,6 +2069,9 @@
     var gg = ctx.createLinearGradient(0, GROUND_Y, 0, H);
     gg.addColorStop(0, P.ground); gg.addColorStop(1, lerp(P.ground, "#000000", 0.3));
     ctx.fillStyle = gg; ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+    // ✨ خط روشن بالای زمین (نوار نور)
+    ctx.fillStyle = "rgba(255,255,255,0.18)";
+    ctx.fillRect(0, GROUND_Y + 1, W, 1.5);
     ctx.strokeStyle = lerp(P.ground, "#000000", 0.4); ctx.lineWidth = 1;
     for (var row = 0; row < 3; row++) {
       var rY = GROUND_Y + 8 + row * 16, off = (row % 2) * 20;
@@ -2026,13 +2120,28 @@
 
     if (state.flash > 0 && state.flashColor) { ctx.fillStyle = state.flashColor; ctx.fillRect(0, 0, W, H); }
     if (P.isNight) { ctx.fillStyle = "rgba(10,20,40,0.12)"; ctx.fillRect(0, 0, W, H); }
+    // 🎞️ vignette ظریف برای عمق سینمایی
+    var vg = ctx.createRadialGradient(W/2, H/2, H * 0.55, W/2, H/2, H * 1.05);
+    vg.addColorStop(0, "rgba(0,0,0,0)");
+    vg.addColorStop(1, "rgba(0,0,0,0.16)");
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, W, H);
   }
 
   function cloud(cx, cy) {
+    // ابر چندحبابی نرم
     ctx.beginPath();
     ctx.arc(cx, cy, 14, 0, Math.PI * 2); ctx.arc(cx + 16, cy + 4, 12, 0, Math.PI * 2);
     ctx.arc(cx - 14, cy + 4, 11, 0, Math.PI * 2); ctx.arc(cx + 6, cy - 6, 9, 0, Math.PI * 2);
+    ctx.arc(cx + 28, cy + 6, 8, 0, Math.PI * 2);
     ctx.fill();
+    // سایه‌ی ظریف زیر ابر برای عمق
+    var prevFill = ctx.fillStyle;
+    ctx.fillStyle = "rgba(0,0,0,0.05)";
+    ctx.beginPath();
+    ctx.ellipse(cx + 3, cy + 11, 26, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = prevFill;
   }
 
   function cigogne(x, y, ph, P) {
@@ -2842,7 +2951,11 @@
     var cs = P.isNight ? ["#7A5A3D", "#664A30", "#594025", "#6B4830"] : ["#FFCBA4", "#F4A582", "#FCDDB0", "#E8BFA0", "#FFB088", "#F5C99F"];
     var bc = cs[idx % cs.length];
     var hW = 55, hH = 80;
-    ctx.fillStyle = bc; ctx.fillRect(bx, bY - hH, hW, hH);
+    // دیوار با gradient عمودی (پایین تیره‌تر = عمق)
+    var wallG = ctx.createLinearGradient(bx, bY - hH, bx, bY);
+    wallG.addColorStop(0, lerp(bc, "#FFFFFF", 0.08));
+    wallG.addColorStop(1, lerp(bc, "#000000", 0.12));
+    ctx.fillStyle = wallG; ctx.fillRect(bx, bY - hH, hW, hH);
     ctx.fillStyle = P.colombage;
     ctx.fillRect(bx, bY - hH, hW, 3); ctx.fillRect(bx, bY - hH + 25, hW, 2); ctx.fillRect(bx, bY - hH + 50, hW, 2);
     ctx.fillRect(bx, bY - hH, 2, hH); ctx.fillRect(bx + hW - 2, bY - hH, 2, hH); ctx.fillRect(bx + hW/2 - 1, bY - hH, 2, hH);
@@ -2851,15 +2964,41 @@
     ctx.moveTo(bx, bY - hH + 25); ctx.lineTo(bx + hW/2, bY - hH + 50);
     ctx.moveTo(bx + hW, bY - hH + 25); ctx.lineTo(bx + hW/2, bY - hH + 50);
     ctx.stroke();
-    ctx.fillStyle = P.isNight ? "#4A2A1A" : "#8B3A2A";
+    // سقف با gradient
+    var roofC = P.isNight ? "#4A2A1A" : "#8B3A2A";
+    var roofG = ctx.createLinearGradient(bx, bY - hH - 28, bx, bY - hH);
+    roofG.addColorStop(0, lerp(roofC, "#FFFFFF", 0.12));
+    roofG.addColorStop(1, roofC);
+    ctx.fillStyle = roofG;
     ctx.beginPath();
     ctx.moveTo(bx - 3, bY - hH); ctx.lineTo(bx + hW/2, bY - hH - 28); ctx.lineTo(bx + hW + 3, bY - hH); ctx.closePath(); ctx.fill();
-    if (P.isNight) { ctx.fillStyle = ((idx + Math.floor(bx)) % 2 === 0) ? "#FFD966" : "#3D2818"; }
+    // پنجره‌ها با glow شب
+    if (P.isNight) {
+      var lit = ((idx + Math.floor(bx)) % 2 === 0);
+      if (lit) {
+        // glow نرم اطراف پنجره‌ی روشن
+        ctx.fillStyle = "rgba(255,217,102,0.25)";
+        ctx.fillRect(bx + 5, bY - 58, 18, 20);
+        ctx.fillRect(bx + 32, bY - 58, 18, 20);
+        ctx.fillStyle = "#FFD966";
+      } else {
+        ctx.fillStyle = "#3D2818";
+      }
+    }
     else { ctx.fillStyle = "#5DB8FF"; }
     ctx.fillRect(bx + 8, bY - 55, 12, 14); ctx.fillRect(bx + 35, bY - 55, 12, 14);
+    // انعکاس نور روی پنجره (روز)
+    if (!P.isNight) {
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.fillRect(bx + 9, bY - 54, 4, 5);
+      ctx.fillRect(bx + 36, bY - 54, 4, 5);
+    }
     ctx.strokeStyle = P.colombage; ctx.lineWidth = 1.5;
     ctx.strokeRect(bx + 8, bY - 55, 12, 14); ctx.strokeRect(bx + 35, bY - 55, 12, 14);
     ctx.fillStyle = P.wood; ctx.fillRect(bx + hW/2 - 6, bY - 25, 12, 25);
+    // دستگیره‌ی در
+    ctx.fillStyle = "#FFD966";
+    ctx.beginPath(); ctx.arc(bx + hW/2 + 3, bY - 13, 1.3, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#A32D2D";
     ctx.fillRect(bx + 8, bY - 41, 12, 3); ctx.fillRect(bx + 35, bY - 41, 12, 3);
     ctx.fillStyle = "#E24B4A";
@@ -2894,7 +3033,14 @@
 
   function tree(tx, P) {
     var bY = GROUND_Y;
-    ctx.fillStyle = "#5C3A21"; ctx.fillRect(tx + 11, bY - 32, 6, 32);
+    // سایه‌ی درخت
+    ctx.fillStyle = "rgba(0,0,0,0.12)";
+    ctx.beginPath(); ctx.ellipse(tx + 14, bY + 1, 18, 3, 0, 0, Math.PI * 2); ctx.fill();
+    // تنه با gradient
+    var trunkG = ctx.createLinearGradient(tx + 11, 0, tx + 17, 0);
+    trunkG.addColorStop(0, "#6B4528");
+    trunkG.addColorStop(1, "#4A2E18");
+    ctx.fillStyle = trunkG; ctx.fillRect(tx + 11, bY - 32, 6, 32);
     var lv = P.isNight ? "#1A2E1A" : "#3B6D11";
     ctx.fillStyle = lv;
     ctx.beginPath();
@@ -2903,6 +3049,14 @@
     ctx.arc(tx + 23, bY - 33, 12, 0, Math.PI * 2);
     ctx.arc(tx + 14, bY - 50, 11, 0, Math.PI * 2);
     ctx.fill();
+    // highlight روی برگ‌ها (سمت نور)
+    if (!P.isNight) {
+      ctx.fillStyle = "rgba(255,255,200,0.18)";
+      ctx.beginPath();
+      ctx.arc(tx + 18, bY - 48, 8, 0, Math.PI * 2);
+      ctx.arc(tx + 24, bY - 36, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   function drawPlayer(p) {
@@ -3128,11 +3282,10 @@
 
   function buildItemSprite(it) {
     var w = Math.round(it.w), h = Math.round(it.h);
-    var pad = 10;
+    var pad = 12;
     var spriteW = w + pad * 2;
     var spriteH = h + pad * 2;
     // ⚡ از effectiveScale واقعی استفاده کن (نه فقط dpr)
-    // این ضریب بعد از setupCanvasHiDPI آپدیت می‌شه
     var scale = Math.max(2, effectiveScale * 2);  // حداقل ۲ برابر برای تیزی
 
     var off = document.createElement("canvas");
@@ -3144,28 +3297,56 @@
     octx.imageSmoothingQuality = "high";
 
     var x = pad, y = pad + h;
+    var isBonus = it.type === "bonus";
 
-    // halo برای bonus
-    if (it.type === "bonus") {
+    // 🌟 سایه‌ی نرم زیر کارت
+    octx.save();
+    octx.shadowColor = "rgba(0,0,0,0.28)";
+    octx.shadowBlur = 8;
+    octx.shadowOffsetY = 3;
+    octx.fillStyle = "#FFFFFF";
+    rrPath(octx, x, y - h, w, h, 10);
+    octx.fill();
+    octx.restore();
+
+    // halo درخشان برای bonus
+    if (isBonus) {
       octx.strokeStyle = it.color;
-      octx.globalAlpha = 0.3;
-      octx.lineWidth = 2;
-      rrPath(octx, x - 6, y - h - 6, w + 12, h + 12, 14);
+      octx.globalAlpha = 0.35;
+      octx.lineWidth = 2.5;
+      rrPath(octx, x - 5, y - h - 5, w + 10, h + 10, 14);
+      octx.stroke();
+      octx.globalAlpha = 0.15;
+      octx.lineWidth = 1.5;
+      rrPath(octx, x - 9, y - h - 9, w + 18, h + 18, 17);
       octx.stroke();
       octx.globalAlpha = 1;
     }
-    // پس‌زمینه سفید
-    octx.fillStyle = "#FFFFFF";
-    rrPath(octx, x, y - h, w, h, 8);
+
+    // پس‌زمینه با gradient ظریف (سفید به رنگ خیلی روشن آیتم)
+    var bgGrad = octx.createLinearGradient(x, y - h, x, y);
+    bgGrad.addColorStop(0, "#FFFFFF");
+    bgGrad.addColorStop(1, isBonus ? "#FAFFF8" : "#FFF8F8");
+    octx.fillStyle = bgGrad;
+    rrPath(octx, x, y - h, w, h, 10);
     octx.fill();
-    // نوار رنگی بالا
-    octx.fillStyle = it.color;
-    rrTopPath(octx, x, y - h, w, 10, 8);
+
+    // نوار رنگی بالا با gradient
+    var stripGrad = octx.createLinearGradient(x, y - h, x + w, y - h);
+    stripGrad.addColorStop(0, it.color);
+    stripGrad.addColorStop(0.5, lightenColor(it.color, 18));
+    stripGrad.addColorStop(1, it.color);
+    octx.fillStyle = stripGrad;
+    rrTopPath(octx, x, y - h, w, 11, 10);
     octx.fill();
+    // خط براق روی نوار
+    octx.fillStyle = "rgba(255,255,255,0.35)";
+    octx.fillRect(x + 6, y - h + 2, w - 12, 2);
+
     // حاشیه
     octx.strokeStyle = it.color;
-    octx.lineWidth = 3;
-    rrPath(octx, x, y - h, w, h, 8);
+    octx.lineWidth = 2.5;
+    rrPath(octx, x, y - h, w, h, 10);
     octx.stroke();
 
     var centerY = y - Math.round(h / 2);
@@ -3201,6 +3382,15 @@
     }
 
     return { canvas: off, w: spriteW, h: spriteH, pad: pad, scale: scale };
+  }
+
+  // 🎨 روشن‌تر کردن رنگ hex
+  function lightenColor(hex, amt) {
+    var c = hex.replace("#", "");
+    var r = Math.min(255, parseInt(c.substring(0, 2), 16) + amt);
+    var g2 = Math.min(255, parseInt(c.substring(2, 4), 16) + amt);
+    var b = Math.min(255, parseInt(c.substring(4, 6), 16) + amt);
+    return "rgb(" + r + "," + g2 + "," + b + ")";
   }
 
   function getItemSprite(it) {
@@ -3241,54 +3431,90 @@
     if (it.isWall) {
       // y = پایین، h = ارتفاع، پس از (x, y-h) به (x+w, y) رندر می‌کنیم
       var wallTop = y - h;
-      // پس‌زمینه‌ی قرمز تیره با gradient
+      // سایه‌ی دیوار روی زمین
+      ctx.fillStyle = "rgba(0,0,0,0.22)";
+      ctx.beginPath();
+      ctx.ellipse(x + w/2, GROUND_Y + 3, w/1.6, 4, 0, 0, Math.PI*2);
+      ctx.fill();
+      // پس‌زمینه‌ی قرمز با gradient سه‌بعدی (روشن وسط)
       var wallGrad = ctx.createLinearGradient(x, 0, x + w, 0);
-      wallGrad.addColorStop(0, "#8B1F1F");
-      wallGrad.addColorStop(0.5, "#A32D2D");
-      wallGrad.addColorStop(1, "#8B1F1F");
+      wallGrad.addColorStop(0, "#6E1515");
+      wallGrad.addColorStop(0.25, "#A32D2D");
+      wallGrad.addColorStop(0.5, "#B83838");
+      wallGrad.addColorStop(0.75, "#A32D2D");
+      wallGrad.addColorStop(1, "#6E1515");
       ctx.fillStyle = wallGrad;
-      rr(x, wallTop, w, h, 4, true, false);
-      // border قرمز روشن
-      ctx.strokeStyle = "#D44949";
-      ctx.lineWidth = 2;
-      rr(x, wallTop, w, h, 4, false, true);
-      // الگوی آجری
-      ctx.strokeStyle = "rgba(0,0,0,0.25)";
-      ctx.lineWidth = 1;
+      rr(x, wallTop, w, h, 6, true, false);
+      // الگوی آجری با عمق
+      ctx.strokeStyle = "rgba(0,0,0,0.3)";
+      ctx.lineWidth = 1.2;
       for (var bj = 0; bj < h; bj += 22) {
         ctx.beginPath();
-        ctx.moveTo(x, wallTop + bj);
-        ctx.lineTo(x + w, wallTop + bj);
+        ctx.moveTo(x + 2, wallTop + bj);
+        ctx.lineTo(x + w - 2, wallTop + bj);
         ctx.stroke();
-        // آجرهای offset
         var offset = (bj / 22) % 2 === 0 ? 0 : w / 2;
-        ctx.beginPath();
-        ctx.moveTo(x + offset, wallTop + bj);
-        ctx.lineTo(x + offset, wallTop + bj + 22);
-        ctx.stroke();
+        if (offset > 0 && offset < w) {
+          ctx.beginPath();
+          ctx.moveTo(x + offset, wallTop + bj);
+          ctx.lineTo(x + offset, wallTop + Math.min(bj + 22, h));
+          ctx.stroke();
+        }
       }
-      // emoji + label در وسط ارتفاع
-      var midY = wallTop + h / 2;
-      // باکس برای متن
-      ctx.font = "bold 14px Inter, sans-serif";
-      var labelW = ctx.measureText(it.label).width + 60;
-      var boxX = x + w / 2 - labelW / 2;
-      ctx.fillStyle = "rgba(255,255,255,0.97)";
-      ctx.fillRect(boxX, midY - 18, labelW, 36);
-      ctx.strokeStyle = "#5C0F0F";
+      // خط براق سمت چپ (نور)
+      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      ctx.fillRect(x + 2, wallTop + 2, 3, h - 4);
+      // ⚠️ نوار خطر بالای دیوار (زرد-مشکی)
+      var stripeH = 8;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x, wallTop, w, stripeH);
+      ctx.clip();
+      for (var sti = -1; sti < w / 14 + 1; sti++) {
+        ctx.fillStyle = sti % 2 === 0 ? "#FFD12E" : "#1A1A1A";
+        ctx.beginPath();
+        ctx.moveTo(x + sti * 14, wallTop);
+        ctx.lineTo(x + sti * 14 + 14, wallTop);
+        ctx.lineTo(x + sti * 14 + 6, wallTop + stripeH);
+        ctx.lineTo(x + sti * 14 - 8, wallTop + stripeH);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+      // border قرمز روشن
+      ctx.strokeStyle = "#E05555";
       ctx.lineWidth = 2;
-      ctx.strokeRect(boxX, midY - 18, labelW, 36);
+      rr(x, wallTop, w, h, 6, false, true);
+      // emoji + label در وسط ارتفاع - باکس گرد با سایه
+      var midY = wallTop + h / 2;
+      ctx.font = "bold 14px Inter, sans-serif";
+      var labelW = ctx.measureText(it.label).width + 62;
+      var boxX = x + w / 2 - labelW / 2;
+      // سایه باکس
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      rr(boxX + 2, midY - 17, labelW, 36, 10, true, false);
+      // باکس سفید گرد
+      ctx.fillStyle = "rgba(255,255,255,0.97)";
+      rr(boxX, midY - 19, labelW, 36, 10, true, false);
+      ctx.strokeStyle = "#7A1A1A";
+      ctx.lineWidth = 2;
+      rr(boxX, midY - 19, labelW, 36, 10, false, true);
       // emoji
       ctx.font = "20px sans-serif";
       ctx.textAlign = "left";
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#A32D2D";
-      ctx.fillText(it.emoji, boxX + 8, midY);
+      ctx.fillText(it.emoji, boxX + 9, midY - 1);
       // label
       ctx.font = "bold 14px Inter, sans-serif";
-      ctx.fillStyle = "#A32D2D";
-      ctx.fillText(it.label, boxX + 36, midY);
+      ctx.fillStyle = "#8B1F1F";
+      ctx.fillText(it.label, boxX + 37, midY - 1);
       ctx.textBaseline = "alphabetic";
+      // فلش راهنما پایین دیوار (↓ خم شو)
+      ctx.font = "bold 13px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.fillText("⬇", x + w / 2, y + 16);
       return;
     }
 
