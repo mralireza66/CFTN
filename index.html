@@ -3836,16 +3836,18 @@
   // نمایش top scores توی صفحه‌ی اسم
   function showTopScoresPreview() {
     var container = document.getElementById("topScoresPreview");
-    var arr = loadLeaderboard().slice(0, 5);
+    var arr = loadLeaderboard().slice(0, 10);
     if (arr.length === 0) {
       container.innerHTML = "";
       return;
     }
-    var html = "<div style='font-size: 13px; font-weight: 600; color: #185FA5; margin-bottom: 8px;'>🏆 Top 5 actuels</div><div style='display: grid; gap: 4px; font-size: 12px;'>";
+    var medals = ["🥇", "🥈", "🥉"];
+    var html = "<div style='font-size: 13px; font-weight: 600; color: #185FA5; margin-bottom: 8px;'>🏆 Top 10 actuels</div><div style='display: grid; gap: 4px; font-size: 12px;'>";
     for (var i = 0; i < arr.length; i++) {
       var e = arr[i];
+      var rankLabel = i < 3 ? medals[i] : (i + 1) + ".";
       html += "<div style='display: flex; justify-content: space-between; padding: 3px 8px;'>" +
-        "<span><b>" + (i + 1) + ".</b> " + escapeHtml(e.name) + "</span>" +
+        "<span><b>" + rankLabel + "</b> " + escapeHtml(e.name) + "</span>" +
         "<span style='color: #1D9E75; font-weight: 600;'>" + e.score + " pts</span>" +
         "</div>";
     }
