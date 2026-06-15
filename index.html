@@ -3753,6 +3753,8 @@
     })
     .catch(function(err) {
       console.warn("[Leaderboard] Échec de l'envoi:", err);
+      // خطا رو به بالا propagate نکن تا زنجیره‌ی then نشکنه، ولی لاگ کن
+      return null;
     });
   }
 
@@ -3778,11 +3780,11 @@
     globalScoresCache = arr;
   }
 
-  function addScore(name, score, concepts) {
-    var arr = loadLeaderboard().slice();  // copy
-    // پیدا کردن رکورد قبلی این بازیکن
-    var existingIdx = -1;
+  // 🔀 ادغام یک رکورد جدید با آرایه‌ی موجود (best score per name)
+  function mergeScore(arr, name, score, concepts) {
+    arr = arr.slice();
     var nameLower = name.toLowerCase().trim();
+    var existingIdx = -1;
     for (var i = 0; i < arr.length; i++) {
       if (arr[i].name && arr[i].name.toLowerCase().trim() === nameLower) {
         existingIdx = i; break;
@@ -3791,18 +3793,59 @@
     if (existingIdx >= 0) {
       if (score > arr[existingIdx].score) {
         arr[existingIdx] = { name: name, score: score, concepts: concepts, date: new Date().toISOString().slice(0, 10), isNew: true };
-      } else {
-        arr[existingIdx].isNew = false;
       }
     } else {
       arr.push({ name: name, score: score, concepts: concepts, date: new Date().toISOString().slice(0, 10), isNew: true });
     }
     arr.sort(function(a, b) { return b.score - a.score; });
-    arr = arr.slice(0, 50);
-    saveLeaderboard(arr);
-    // 🌐 sync به JSONBin (async، نتیجه رو منتظر نمی‌مونیم)
-    pushGlobalScores(arr);
-    return arr;
+    return arr.slice(0, 50);
+  }
+
+  function addScore(name, score, concepts) {
+    // 1️⃣ فوراً به‌صورت محلی merge کن تا UI سریع آپدیت شه
+    var localArr = mergeScore(loadLeaderboard(), name, score, concepts);
+    saveLeaderboard(localArr);
+
+    // 2️⃣ 🌐 ذخیره‌ی امن با retry برای جلوگیری از race condition:
+    //    هر بار آخرین داده‌ی سرور رو می‌گیریم، merge می‌کنیم، push می‌کنیم
+    //    اگه بین خواندن و نوشتن یکی دیگه نوشته باشه، دوباره تلاش می‌کنیم
+    var maxRetries = 4;
+    function attemptSave(retriesLeft) {
+      fetchGlobalScores(function(serverScores) {
+        // ✅ چک کن آیا امتیاز ما واقعاً توی نتیجه‌ی نهایی هست
+        var merged = mergeScore(serverScores, name, score, concepts);
+        saveLeaderboard(merged);
+        pushGlobalScores(merged).then(function(result) {
+          // 🔍 تأیید: بعد از push، دوباره بخون و مطمئن شو امتیاز ما هنوز هست
+          setTimeout(function() {
+            fetchGlobalScores(function(verifyScores) {
+              var found = false;
+              var nameLower = name.toLowerCase().trim();
+              for (var i = 0; i < verifyScores.length; i++) {
+                if (verifyScores[i].name && verifyScores[i].name.toLowerCase().trim() === nameLower &&
+                    verifyScores[i].score >= score) {
+                  found = true; break;
+                }
+              }
+              if (!found && retriesLeft > 0) {
+                // ❌ امتیاز ما گم شده (یکی همزمان overwrite کرده) → دوباره تلاش
+                console.warn("[Leaderboard] Score perdu, nouvelle tentative... (" + retriesLeft + " restantes)");
+                attemptSave(retriesLeft - 1);
+              } else {
+                // ✅ موفق یا تلاش‌ها تموم شد - render کن
+                var lbList = document.getElementById("leaderboardList");
+                var goList = document.getElementById("gameOverLeaderboardList");
+                if (lbList) renderLeaderboard(lbList, name);
+                if (goList) renderLeaderboard(goList, name);
+              }
+            });
+          }, 400 + Math.random() * 600);  // تأخیر تصادفی برای کاهش برخورد همزمان
+        });
+      });
+    }
+    attemptSave(maxRetries);
+
+    return localArr;
   }
 
   function renderLeaderboard(container, highlightName) {
